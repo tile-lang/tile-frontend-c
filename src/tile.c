@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "../include/tile_lexer.h"
 
-char* read_file(const char* filename);
+// char* read_file(const char* filename);
 int main(int argc, char **argv) {
     (void)argc;
     (void)argv;    
@@ -9,11 +9,11 @@ int main(int argc, char **argv) {
     // char *source = read_file("../build/test.tile");
 
     tile_lexer_t lexer = tile_lexer_init(
-        "1"
+        "\"bla1 bla2 3.2 bla4,5 -> ) <- this is fake parent\""
     );
     tile_token_t token;
 
-    while(token.type != NULL){
+    while(token.type != TOKEN_EOF){
         token = tile_lexer_get_next_token(&lexer);
         printf("TOKEN(%d, %s)\n", token.type, token.value);
     }

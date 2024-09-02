@@ -28,12 +28,6 @@ typedef struct {
     char* value;
 } tile_token_t;
 
-tile_token_t tile_token_create(token_type_t type, const char* value);
-
-void tile_token_free(tile_token_t* token);
-
-void tile_token_print(tile_token_t* token);
-
-const char* tile_token_type_to_string(token_type_t type);
+tile_token_t tile_token_create(token_type_t type, char* value);
 
 #endif // TOKEN_H
