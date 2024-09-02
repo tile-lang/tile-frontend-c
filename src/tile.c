@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     // char *source = read_file("../build/test.tile");
 
     tile_lexer_t lexer = tile_lexer_init(
-        "(\"berke\")"
+        "1"
     );
     tile_token_t token;
 
