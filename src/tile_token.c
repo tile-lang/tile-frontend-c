@@ -1,8 +1,8 @@
-#include "../include/token.h"
+#include "../include/tile_token.h"
 #include <stdlib.h>
 #include <string.h>
 
-tile_token_t* token_create(token_type_t type, const char* value) {
+tile_token_t* tile_token_create(token_type_t type, const char* value) {
     tile_token_t* token = (tile_token_t*)malloc(sizeof(tile_token_t));
     if (token == NULL) {
         return NULL;
@@ -20,7 +20,7 @@ tile_token_t* token_create(token_type_t type, const char* value) {
     return token;
 }
 
-void token_free(tile_token_t* token) {
+void tile_token_free(tile_token_t* token) {
     if (token != NULL) {
         if (token->value != NULL) {
             free(token->value);
@@ -30,7 +30,7 @@ void token_free(tile_token_t* token) {
 }
 
 // Debug function (works with token_type_to_string)
-void token_print(tile_token_t* token) {
+void tile_token_print(tile_token_t* token) {
     if (token == NULL) return;
 
     const char* type_str = token_type_to_string(token->type);
@@ -38,7 +38,7 @@ void token_print(tile_token_t* token) {
     printf("Token Type: %s, Value: %s\n", type_str, token->value);
 }
 
-const char* token_type_to_string(token_type_t type) {
+const char* tile_token_type_to_string(token_type_t type) {
     switch (type) {
         case TOKEN_TRUE:
             return "TRUE";
