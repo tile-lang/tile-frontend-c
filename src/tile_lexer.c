@@ -1,3 +1,4 @@
+#define ARENA_IMPLEMENTATION
 #include "../include/tile_lexer.h"
 #include <stdlib.h>
 #include <string.h>
@@ -39,36 +40,39 @@ char tile_lexer_peek(tile_lexer_t* lexer){
     return lexer->source_code[lexer->cursor + 1];
 }
 
-tile_token_t* tile_lexer_get_next_token(tile_lexer_t* lexer){ // needs strings
+tile_token_t tile_lexer_get_next_token(tile_lexer_t* lexer){ // needs strings
         tile_lexer_skip_whitespace(lexer);
         
         if (isalpha(lexer->current_char) || lexer->current_char == '_')
             return tile_lexer_collect_id(lexer);
-        if (isdigit(lexer->current_char)) 
-            return tile_lexer_collect_number(lexer);
+        // if (isdigit(lexer->current_char)) 
+        //     return tile_lexer_collect_number(lexer);
         if (lexer->current_char == '"')
             return tile_lexer_collect_string(lexer);
         return tile_lexer_collect_one_chars(lexer);
 }
 
-tile_token_t* tile_lexer_collect_one_chars(tile_lexer_t* lexer){
+tile_token_t tile_lexer_collect_one_chars(tile_lexer_t* lexer){
     switch (lexer->current_char){
         case '(':
             tile_lexer_advance(lexer);
-            return tile_token_create(TOKEN_LPAREN, '(');
+            return tile_token_create(TOKEN_LPAREN, "(");
         case ')':
             tile_lexer_advance(lexer);
-            return tile_token_create(TOKEN_RPAREN, ')');
+            return tile_token_create(TOKEN_RPAREN, ")");
         case ';':
             tile_lexer_advance(lexer);
-            return tile_token_create(TOKEN_SEMI, ';');
+            return tile_token_create(TOKEN_SEMI, ";");
+        case EOF:
+            tile_lexer_advance(lexer);
+            return tile_token_create(TOKEN_EOF, "eof");
         default:
             return tile_token_create(TOKEN_NONE, NULL);    
     }
-    return (void*)0;
+    /* return (void)0; */
 }
 
-tile_token_t* tile_lexer_collect_string(tile_lexer_t* lexer){
+tile_token_t tile_lexer_collect_string(tile_lexer_t* lexer){
 
     tile_lexer_advance(lexer); // skip opening '"'
 
@@ -87,27 +91,26 @@ tile_token_t* tile_lexer_collect_string(tile_lexer_t* lexer){
 
     tile_lexer_advance(lexer); // skip closing '"'
 
-    return token_create(TOKEN_STRING, buffer);
+    return tile_token_create(TOKEN_STRING, buffer);
 }
 
-tile_token_t* tile_lexer_collect_id(tile_lexer_t* lexer){
-    char* buffer = NULL;
-    size_t buffer_lenght = 0;
-
-    while (isalnum(lexer->current_char) || lexer->current_char == '_'){
-
-        buffer_lenght++;
-        buffer = (char*)arena_alloc(lexer->tokens_arena, buffer_lenght + 1);
-
-        buffer[buffer_lenght - 1] = lexer->current_char;
-
+tile_token_t tile_lexer_collect_id(tile_lexer_t *lexer) {
+    size_t len = 0;
+    char temp_val[128];
+    while (isalnum(lexer->current_char) || lexer->current_char == '_') {
+        temp_val[len] = lexer->current_char;
+        len++;
         tile_lexer_advance(lexer);
     }
-
-    return token_create(TOKEN_ID, buffer);
+    temp_val[len] = '\0';
+    len++;
+    char* val = (char*)arena_alloc(lexer->tokens_arena, len);
+    memmove(val, temp_val, len);
+    tile_token_t token = tile_token_create(TOKEN_ID, val);
+    return token;
 }
 
-tile_token_t* tile_lexer_collect_number(tile_lexer_t* lexer); // not implemented yet
+// tile_token_t tile_lexer_collect_number(tile_lexer_t* lexer); // not implemented yet
 
 char* tile_lexer_get_current_char_as_string(tile_lexer_t* lexer) {
     char* str = (char*)arena_alloc(lexer->tokens_arena, 2);
