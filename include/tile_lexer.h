@@ -1,7 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include "token.h"
+#include "tile_token.h"
 
 typedef struct
 {
