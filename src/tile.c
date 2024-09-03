@@ -9,10 +9,10 @@ int main(int argc, char **argv) {
     // char *source = read_file("../build/test.tile");
 
     tile_lexer_t lexer = tile_lexer_init(
-        "var name = \"berke\";"
+        "var name = \"berke\""
     );
     tile_token_t token;
-    tile_lexer_get_next_token(&lexer);
+    
     while(token.type != TOKEN_EOF) {
         token = tile_lexer_get_next_token(&lexer);
         printf("TOKEN(%d, %s)\n", token.type, token.value);

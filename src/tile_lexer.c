@@ -60,33 +60,29 @@ char tile_lexer_peek(tile_lexer_t* lexer) {
 
 tile_token_t tile_lexer_get_next_token(tile_lexer_t* lexer) {
         
-        tile_token_t token = tile_token_create(TOKEN_NONE, NULL);
+    tile_token_t token = tile_token_create(TOKEN_NONE, NULL);
 
-        while(token.type == TOKEN_NONE) {
-
-            if (isspace(lexer->current_char)) {
-                tile_lexer_skip_whitespace(lexer);
-                continue;
-            } 
+    if (isspace(lexer->current_char))
+        tile_lexer_skip_whitespace(lexer);
             
-            if (tile_lexer_is_at_end(lexer)) {
-                token = tile_token_create(TOKEN_EOF, "eof");
-                break;
-            }
-            switch (lexer->current_char){
-                case '\"':
-                    token = tile_lexer_collect_string(lexer);
-                    break;
-                default:
-                    if (isalpha(lexer->current_char) || lexer->current_char == '_')
-                        token = tile_lexer_collect_id(lexer);
-                    else if (isdigit(lexer->current_char)) 
-                        token = tile_lexer_collect_number(lexer);
-                    else
-                        token = tile_lexer_collect_symbol(lexer);      
-            }
+    if (tile_lexer_is_at_end(lexer))
+        token = tile_token_create(TOKEN_EOF, "eof");
+            
+    if (lexer->current_char != '\0') {
+        switch (lexer->current_char){
+            case '\"':
+            token = tile_lexer_collect_string(lexer);
+            break;
+        default:
+            if (isalpha(lexer->current_char) || lexer->current_char == '_')
+                token = tile_lexer_collect_id(lexer);
+            else if (isdigit(lexer->current_char)) 
+                token = tile_lexer_collect_number(lexer);
+            else
+                token = tile_lexer_collect_symbol(lexer);      
         }
-        return token;
+    }
+    return token;
 }
 
 tile_token_t tile_lexer_collect_symbol(tile_lexer_t* lexer) {
