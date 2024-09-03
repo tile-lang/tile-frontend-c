@@ -14,10 +14,30 @@ typedef enum {
     TOKEN_FLOAT,
     TOKEN_ID,
 
+    // Keywords
+    TOKEN_IF,
+    TOKEN_ELSEIF,
+    TOKEN_ELSE,
+    TOKEN_FOR,
+    TOKEN_WHILE,
+    TOKEN_MATCH,
+    TOKEN_OPTION,
+    TOKEN_BREAK,
+
     // Symbols
     TOKEN_LPAREN,
     TOKEN_RPAREN,
+    TOKEN_LBRACE,
+    TOKEN_RBRACE,
+
+    TOKEN_ASSIGN,
+    TOKEN_COLON,
     TOKEN_SEMI,
+
+    TOKEN_PLUS,
+    TOKEN_MINUS,
+    TOKEN_MULT,
+    TOKEN_DIV,
 
     TOKEN_UNKNOWN,  // For unknown or unrecognized tokens
     TOKEN_EOF,

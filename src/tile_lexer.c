@@ -15,8 +15,37 @@ typedef struct tile_lextoken_t {
 static const tile_lextoken_t symbols[] = {
     { "(", TOKEN_LPAREN },
     { ")", TOKEN_RPAREN },
+    { "{", TOKEN_LBRACE },
+    { "}", TOKEN_RBRACE },
+
+    { "=", TOKEN_ASSIGN },
+    { ":", TOKEN_COLON },
     { ";", TOKEN_SEMI },
-    { NULL, TOKEN_NONE},
+
+    { "+", TOKEN_PLUS },
+    { "-", TOKEN_MINUS },
+    { "*", TOKEN_MULT },
+    { "/", TOKEN_DIV },
+
+    { NULL, TOKEN_NONE },
+};
+
+static const tile_lextoken_t keywords[] = {
+    { "true", TOKEN_TRUE },
+    { "false", TOKEN_FALSE }, // TODO: true and false can also uppercase like TRUE, FALSE, True, False. Find a solution for that.
+
+    { "if", TOKEN_IF },
+    { "else if", TOKEN_ELSEIF }, // TODO: 'else if' or 'elseif' which one?
+    { "else", TOKEN_ELSE },
+
+    { "for", TOKEN_FOR },
+    { "while", TOKEN_WHILE },
+
+    { "match", TOKEN_MATCH },
+    { "option", TOKEN_OPTION },
+    { "break", TOKEN_BREAK },
+
+    { NULL, TOKEN_NONE },
 };
 
 tile_lexer_t tile_lexer_init(const char* src) {
@@ -29,7 +58,6 @@ tile_lexer_t tile_lexer_init(const char* src) {
         .tokens_arena = arena_init(TOKENS_ARENA_CAPACITY),
     };
     return lexer;
-    // tile_lexer_t* lexer = (tile_lexer_t*)malloc(sizeof(tile_lexer_t));
 }
 
 void tile_lexer_advance(tile_lexer_t* lexer) {
@@ -124,6 +152,8 @@ tile_token_t tile_lexer_collect_string(tile_lexer_t* lexer) {
 tile_token_t tile_lexer_collect_id(tile_lexer_t *lexer) {
     size_t len = 0;
     char temp_val[128];
+    tile_token_t token;
+
     while (isalnum(lexer->current_char) || lexer->current_char == '_') {
         temp_val[len] = lexer->current_char;
         len++;
@@ -133,7 +163,14 @@ tile_token_t tile_lexer_collect_id(tile_lexer_t *lexer) {
     len++;
     char* val = (char*)arena_alloc(lexer->tokens_arena, len);
     memmove(val, temp_val, len);
-    tile_token_t token = tile_token_create(TOKEN_ID, val);
+
+    for (int i = 0; keywords[i].text != NULL; i++) {
+        if (strcmp(val, keywords[i].text) == 0) {
+            token = tile_token_create(keywords[i].type, keywords[i].text);
+            return token;
+        }
+    }
+    token = tile_token_create(TOKEN_ID, val);
     return token;
 }
 

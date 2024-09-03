@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     // char *source = read_file("../build/test.tile");
 
     tile_lexer_t lexer = tile_lexer_init(
-        "var name = \"berke\""
+        "if match else 12 true True false 4.55 False berke + if ; if name"
     );
     tile_token_t token;
     
