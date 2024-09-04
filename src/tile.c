@@ -4,18 +4,19 @@
 // char* read_file(const char* filename);
 int main(int argc, char **argv) {
     (void)argc;
-    (void)argv;    
+    (void)argv;
 
     // char *source = read_file("../build/test.tile");
 
     tile_lexer_t lexer = tile_lexer_init(
-        "if match else 12 true True false 4.55 False berke + if ; if name"
+        "if match \n 12" , 
+        NULL
     );
     tile_token_t token;
     
     while(token.type != TOKEN_EOF) {
         token = tile_lexer_get_next_token(&lexer);
-        printf("TOKEN(%d, %s)\n", token.type, token.value);
+        printf("TOKEN(%d, %s, Row %d, Col %d)\n", token.type, token.value, lexer.loc.row, lexer.loc.col);
     }
     return 0;
 }

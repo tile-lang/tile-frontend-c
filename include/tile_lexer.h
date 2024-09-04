@@ -4,6 +4,11 @@
 #include "tile_token.h"
 #include "common/arena.h"
 
+typedef struct {
+    int row, col;
+    const char* file_name;
+} tile_loc_t;
+
 typedef struct
 {
     size_t cursor;
@@ -11,11 +16,12 @@ typedef struct
     char current_char;
     const char* source_code;
     size_t source_code_size;
+    tile_loc_t loc;
     arena_t* tokens_arena;
 }tile_lexer_t;
 
 // lexer_init needs const* char file_name
-tile_lexer_t tile_lexer_init(const char* src);
+tile_lexer_t tile_lexer_init(const char* src, const char* file_name);
 
 void tile_lexer_advance(tile_lexer_t* lexer);
 void tile_lexer_advance_by(tile_lexer_t* lexer, int steps);
