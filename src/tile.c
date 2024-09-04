@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../include/tile_lexer.h"
+#include <tile_lexer.h>
 
 // char* read_file(const char* filename);
 int main(int argc, char **argv) {

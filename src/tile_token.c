@@ -1,4 +1,4 @@
-#include "../include/tile_token.h"
+#include <tile_token.h>
 #include <stdlib.h>
 #include <string.h>
 

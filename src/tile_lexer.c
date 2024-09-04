@@ -1,9 +1,9 @@
 #define ARENA_IMPLEMENTATION
-#include "../include/tile_lexer.h"
+#include <tile_lexer.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <../include/common/arena.h>
+#include <common/arena.h>
 
 #define TOKENS_ARENA_CAPACITY 2048
 
@@ -31,11 +31,10 @@ static const tile_lextoken_t symbols[] = {
 };
 
 static const tile_lextoken_t keywords[] = {
-    { "true", TOKEN_TRUE },
-    { "false", TOKEN_FALSE }, // TODO: true and false can also uppercase like TRUE, FALSE, True, False. Find a solution for that.
+    { "true", TOKEN_TRUE_LITERAL },
+    { "false", TOKEN_FALSE_LITERAL },
 
     { "if", TOKEN_IF },
-    { "else if", TOKEN_ELSEIF }, // TODO: 'else if' or 'elseif' which one?
     { "else", TOKEN_ELSE },
 
     { "for", TOKEN_FOR },
@@ -142,7 +141,7 @@ tile_token_t tile_lexer_collect_string(tile_lexer_t* lexer) {
     len++;
     char* val = (char*)arena_alloc(lexer->tokens_arena, len);
     memmove(val, temp_val, len);
-    tile_token_t token = tile_token_create(TOKEN_STRING, val);
+    tile_token_t token = tile_token_create(TOKEN_STRING_LITERAL, val);
     
     tile_lexer_advance(lexer); // skip closing '"'
 
@@ -170,14 +169,14 @@ tile_token_t tile_lexer_collect_id(tile_lexer_t *lexer) {
             return token;
         }
     }
-    token = tile_token_create(TOKEN_ID, val);
+    token = tile_token_create(TOKEN_ID_LITERAL, val);
     return token;
 }
 
 tile_token_t tile_lexer_collect_number(tile_lexer_t* lexer) {
     size_t len = 0;
     char temp_val[128];
-    token_type_t type = TOKEN_FLOAT;
+    token_type_t type = TOKEN_FLOAT_LITERAL;
 
     while(isdigit(lexer->current_char)) {
         temp_val[len] = lexer->current_char;
@@ -197,7 +196,7 @@ tile_token_t tile_lexer_collect_number(tile_lexer_t* lexer) {
         }   
     }
     else {
-        type = TOKEN_INT;
+        type = TOKEN_INT_LITERAL;
     }
     temp_val[len] = '\0';
     len++;
