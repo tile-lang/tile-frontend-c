@@ -12,18 +12,32 @@ typedef struct tile_lextoken_t {
     token_type_t type;
 } tile_lextoken_t;
 
+#define MAX_SYMBOL_LENGTH 2
+
 static const tile_lextoken_t symbols[] = {
+    { "<", TOKEN_LESS },
+    { "<=", TOKEN_LESSEQ },
+    { ">", TOKEN_GREATER },
+    { ">=", TOKEN_GREATEREQ },
+    { "==", TOKEN_EQ },
+    { "!=", TOKEN_NEQ },
+
     { "(", TOKEN_LPAREN },
     { ")", TOKEN_RPAREN },
     { "{", TOKEN_LBRACE },
     { "}", TOKEN_RBRACE },
+    { "[", TOKEN_LSQUARE },
+    { "]", TOKEN_RSQUARE },
 
     { "=", TOKEN_ASSIGN },
     { ":", TOKEN_COLON },
     { ";", TOKEN_SEMI },
+    { "//", TOKEN_COMMENT },
 
     { "+", TOKEN_PLUS },
     { "-", TOKEN_MINUS },
+    { "++", TOKEN_INC },
+    { "--", TOKEN_DEC },
     { "*", TOKEN_MULT },
     { "/", TOKEN_DIV },
 
@@ -121,11 +135,17 @@ tile_token_t tile_lexer_get_next_token(tile_lexer_t* lexer) {
 }
 
 tile_token_t tile_lexer_collect_symbol(tile_lexer_t* lexer) {
-    for (int i = 0; symbols[i].text != NULL; i++) {
-        int len = strlen(symbols[i].text);
-        if (strncmp(&lexer->source_code[lexer->cursor], symbols[i].text, len) == 0) {
-            tile_lexer_advance_by(lexer, len);
-            return tile_token_create(symbols[i].type, symbols[i].text);
+    for (int len = MAX_SYMBOL_LENGTH; len > 0; len--) {
+        if (lexer->cursor + len <= lexer->source_code_size) {
+            char sym[MAX_SYMBOL_LENGTH + 1] = {0};
+            strncpy(sym, &lexer->source_code[lexer->cursor], len);
+            sym[len] = '\0';
+            for (int i = 0; symbols[i].text != NULL; i++) {
+                if (strcmp(sym, symbols[i].text) == 0) {
+                    tile_lexer_advance_by(lexer, len);
+                    return tile_token_create(symbols[i].type, strdup(sym));
+                }
+            }
         }
     }
     char* c = tile_lexer_get_current_char_as_string(lexer);
