@@ -47,22 +47,30 @@ static const tile_lextoken_t keywords[] = {
     { NULL, TOKEN_NONE },
 };
 
-tile_lexer_t tile_lexer_init(const char* src) {
+tile_lexer_t tile_lexer_init(const char* src, const char* file_name) {
     tile_lexer_t lexer = {
         .cursor = 0,
         .prev_char = src[0],
         .current_char = src[0],
         .source_code = src,
         .source_code_size = strlen(src),
+        .loc.row = 0,
+        .loc.col = 0,
+        .loc.file_name =  file_name,
         .tokens_arena = arena_init(TOKENS_ARENA_CAPACITY),
     };
     return lexer;
 }
 
 void tile_lexer_advance(tile_lexer_t* lexer) {
+    if (lexer->current_char == '\n') {
+        lexer->loc.row++;
+        lexer->loc.col = 0;
+    }
     if (!tile_lexer_is_at_end(lexer)) {
         lexer->cursor++;
         lexer->current_char = lexer->source_code[lexer->cursor];
+        lexer->loc.col++;
     }
 }
 
