@@ -1,12 +1,10 @@
 #include <stdio.h>
+#include <tile_token.h>
 #include <tile_lexer.h>
+#include <tile_cli_parser.h>
 
-// char* read_file(const char* filename);
-int main(int argc, char **argv) {
-    (void)argc;
-    (void)argv;
-
-    // char *source = read_file("../build/test.tile");
+int main(int argc, char *argv[]) {
+    parse_args(argc, argv);  // Use the tile_cli_parser to handle arguments
 
     tile_lexer_t lexer = tile_lexer_init(
         "< <= [] ++ " , 
@@ -21,7 +19,8 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-
+// char* read_file(const char* filename);
+// char *source = read_file("../build/test.tile");
 /* char* read_file(const char* filename){
     FILE *file = fopen(filename, "rb");
     if (!file) {
