@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     // char *source = read_file("../build/test.tile");
 
     tile_lexer_t lexer = tile_lexer_init(
-        "if match \n 12" , 
+        "< <= [] ++ " , 
         NULL
     );
     tile_token_t token;
