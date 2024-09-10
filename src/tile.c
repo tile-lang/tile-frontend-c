@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
     parse_args(argc, argv);  // Use the tile_cli_parser to handle arguments
 
     tile_lexer_t lexer = tile_lexer_init(
-        "< <= [] ++ " , 
+        "if match \n 12 \n < <= [] ++ " , 
         NULL
     );
     tile_token_t token;
