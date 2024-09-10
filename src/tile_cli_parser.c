@@ -6,7 +6,7 @@
 
 #define VERSION "1.0.0"
 #define HELP_TEXT \
-"Usage: tile.exe [OPTIONS]\n" \
+"Usage: tile [OPTIONS]\n" \
 "Options:\n" \
 "  --version      Show version information\n" \
 "  --help         Show this help message\n"
