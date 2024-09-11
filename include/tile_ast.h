@@ -19,6 +19,7 @@ typedef struct tile_ast {
         AST_BINARY_EXPR,
         AST_UNARY_EXPR,
 
+        AST_WHILE_STATEMENT,
         AST_IF_STATEMENT,
         AST_LOOP,
 
@@ -34,15 +35,20 @@ typedef struct tile_ast {
             size_t statement_count;
         } program;
 
-        // AST_LITERAL (int, float, string)
-        struct ast_literal {
+        // AST_STRING
+        struct ast_string {
+            const char* text_value;
+            const char* string_value;  
+        } string;
+
+        // AST_LITERAL_INT and AST_LITERAL_FLOAT
+        struct ast_number {
             const char* text_value;
             union {
-                int int_value;
-                float float_value;
-                const char* string_value;
-            } value;
-        } literal;
+                int value;
+                float fvalue;
+            }; 
+        } number;
 
         // AST_VARIABLE (declaration, assignment, and usage)
         struct ast_variable_decl {
@@ -71,6 +77,12 @@ typedef struct tile_ast {
             struct tile_ast* operand;
         } unary_expr;
 
+        // AST_WHILE
+        struct ast_while_statement {
+            struct tile_ast* condition;
+            struct tile_ast* body;
+        } while_statement;
+
         // AST_IF_STATEMENT
         struct ast_if_statement {
             struct tile_ast* condition;
@@ -87,6 +99,11 @@ typedef struct tile_ast {
 
 } tile_ast_t;
 
+void tile_ast_arena_init();
+void tile_ast_arena_destroy();
+
 tile_ast_t* tile_ast_create(tile_ast_t ast);
+
+void tile_ast_show(tile_ast_t* node, int indent);
 
 #endif // TILE_AST_H

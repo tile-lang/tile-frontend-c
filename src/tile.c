@@ -1,21 +1,36 @@
 #include <stdio.h>
 #include <tile_token.h>
-#include <tile_lexer.h>
-#include <tile_cli_parser.h>
+#include <tile_parser.h>
+// #include <tile_cli_parser.h>
+#define UNUSED(x) (void)(x)
 
 int main(int argc, char *argv[]) {
-    parse_args(argc, argv);  // Use the tile_cli_parser to handle arguments
+    // parse_args(argc, argv);  // Use the tile_cli_parser to handle arguments
+    UNUSED(argc);
+    UNUSED(argv);
 
     tile_lexer_t lexer = tile_lexer_init(
-        "if match \n 12 \n < <= [] ++ " , 
+        "while (1) {\n"
+        "while (2) {}\n"
+        "}\n" , 
         NULL
     );
-    tile_token_t token;
+
+    tile_ast_arena_init();
+    tile_parser_t parser = tile_parser_init(&lexer);
+    tile_parser_eat(&parser, TOKEN_NONE);
+    tile_ast_t* root = tile_parser_parse_statements(&parser);
+    tile_ast_show(root, 0);
     
-    while(token.type != TOKEN_EOF) {
-        token = tile_lexer_get_next_token(&lexer);
-        printf("TOKEN(%d, %s, Row %d, Col %d)\n", token.type, token.value, lexer.loc.row, lexer.loc.col);
-    }
+    // tile_token_t token;
+    
+    // while(token.type != TOKEN_EOF) {
+    //     token = tile_lexer_get_next_token(&lexer);
+    //     printf("TOKEN(%d, %s, Row %d, Col %d)\n", token.type, token.value, lexer.loc.row, lexer.loc.col);
+    // }
+
+    tile_ast_arena_destroy();
+
     return 0;
 }
 
