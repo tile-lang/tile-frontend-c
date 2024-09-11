@@ -74,8 +74,8 @@ typedef struct tile_ast {
         // AST_IF_STATEMENT
         struct ast_if_statement {
             struct tile_ast* condition;
-            struct tile_ast* then_branch;
-            struct tile_ast* else_branch; // Optional, can be NULL
+            struct tile_ast* body;
+            struct tile_ast* altarnate; // Optional, can be NULL
         } if_statement;
 
         // AST_BLOCK, body parts of functions, if elses '{ }'
@@ -87,6 +87,6 @@ typedef struct tile_ast {
 
 } tile_ast_t;
 
-tile_ast_t* tile_ast_init(tile_ast_t ast);
+tile_ast_t* tile_ast_create(tile_ast_t ast);
 
 #endif // TILE_AST_H
