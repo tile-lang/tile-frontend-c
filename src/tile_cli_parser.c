@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <getopt.h>  // Use getopt_long instead of getopt for handle long options
 #include <tile_cli_parser.h>
 
 #define VERSION "1.0.0"
@@ -20,32 +19,18 @@ void print_help(void) {
 }
 
 void parse_args(int argc, char *argv[]) {
-    // Structure defining the long options
-    static struct option long_options[] = {
-        {"version", no_argument, NULL, 'v'},
-        {"help", no_argument, NULL, 'h'},
-        {NULL, 0, NULL, 0}
-    };
-
-    int opt;
-    while ((opt = getopt_long(argc, argv, "vh"/*short options*/, long_options, NULL)) != -1) {
-        switch (opt) {
-            case 'v':
-                print_version();
-                exit(EXIT_SUCCESS);
-            case 'h':
-                print_help();
-                exit(EXIT_SUCCESS);
-            default:
-                print_help();
-                exit(EXIT_FAILURE);
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--version") == 0 || strcmp(argv[i], "-v") == 0) {
+            print_version();
+            exit(EXIT_SUCCESS);
+        } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
+            print_help();
+            exit(EXIT_SUCCESS);
+        } else {
+            // Unrecognized option
+            fprintf(stderr, "Unknown option: %s\n", argv[i]);
+            print_help();
+            exit(EXIT_FAILURE);
         }
-    }
-
-    // Check for remaining arguments that are not options
-    if (optind < argc) {
-        fprintf(stderr, "Unknown option: %s\n", argv[optind]);
-        print_help();
-        exit(EXIT_FAILURE);
     }
 }
