@@ -58,6 +58,9 @@ static const tile_lextoken_t keywords[] = {
     { "option", TOKEN_OPTION },
     { "break", TOKEN_BREAK },
 
+    { "int", TOKEN_INT_KW },
+    { "float", TOKEN_FLOAT_KW },
+
     { NULL, TOKEN_NONE },
 };
 
@@ -197,7 +200,7 @@ tile_token_t tile_lexer_collect_id(tile_lexer_t *lexer) {
             return token;
         }
     }
-    token = tile_token_create(TOKEN_ID_LITERAL, val);
+    token = tile_token_create(TOKEN_ID, val);
     return token;
 }
 

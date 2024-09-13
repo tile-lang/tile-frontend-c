@@ -82,10 +82,16 @@ void tile_ast_show(tile_ast_t* node, int indent) {
             tile_ast_show(node->while_statement.body, indent + 2);
             break;
         case AST_IF_STATEMENT:
-            printf("IF_STATEMENT\n");
-            break; 
-        case AST_LOOP:
-            printf("LOOP\n");
+            printf("IfStmt\n");
+            print_indent(indent + 1);
+            printf("Condition:\n");
+            tile_ast_show(node->if_statement.condition, indent + 2);
+            print_indent(indent + 1);
+            printf("Body:\n");
+            tile_ast_show(node->if_statement.body, indent + 2);
+            print_indent(indent + 1);
+            printf("Altarnate:\n");
+            tile_ast_show(node->if_statement.altarnate, indent + 2);
             break;
         
         case AST_BLOCK:

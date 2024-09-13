@@ -10,10 +10,8 @@ int main(int argc, char *argv[]) {
     UNUSED(argv);
 
     tile_lexer_t lexer = tile_lexer_init(
-        "while (1) {\n"
-        "while (2) {}\n"
-        "}\n" , 
-        NULL
+        "if (4) { int x = 3; } else if (1) { int y = 1; } else { int z = 2; }"
+        , NULL
     );
 
     tile_ast_arena_init();

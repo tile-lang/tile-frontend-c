@@ -37,8 +37,17 @@ tile_ast_t* tile_parser_parse_expression(tile_parser_t* parser) {
         tile_parser_eat(parser, TOKEN_INT_LITERAL);
         return tile_ast_create((tile_ast_t) {
             .number.text_value = parser->current_token.value,
-            .number.value = atoi(parser->current_token.value),
+            .number.value = atoi(parser->current_token.value), // atoi: string -> int casting
             .tag = AST_LITERAL_INT,
+        });
+        break;
+    
+    case TOKEN_FLOAT_LITERAL:
+        tile_parser_eat(parser, TOKEN_FLOAT_LITERAL);
+        return tile_ast_create((tile_ast_t) {
+            .number.text_value = parser->current_token.value,
+            .number.fvalue = atof(parser->current_token.value),
+            .tag = AST_LITERAL_FLOAT,
         });
         break;
 
@@ -54,14 +63,18 @@ tile_ast_t* tile_parser_parse_statement(tile_parser_t* parser) {
         return tile_parser_parse_while_statement(parser);
         break;
 
-    // case TOKEN_IF:
-    //     return tile_parser_parse_if_statement(parser);
-    //     break;
-        
-    // case TOKEN_MATCH:
-    //     return tile_parser_parse_match_statement(parser);
-    //     break;
-    
+    case TOKEN_IF:
+        return tile_parser_parse_if_statement(parser);
+        break;
+
+    case TOKEN_INT_KW:
+        return tile_parser_parse_variable_dec_statement(parser);
+        break;
+
+    case TOKEN_FLOAT_KW:
+        return tile_parser_parse_variable_dec_statement(parser);
+        break; 
+
     default:
     break;
     }
@@ -84,9 +97,8 @@ tile_ast_t* tile_parser_parse_statements(tile_parser_t* parser) {
 }
 
 tile_ast_t* tile_parser_parse_while_statement(tile_parser_t* parser) {
-    // while (condition) {
-    // body
-    // }
+    // while (expression) 
+    // { } // block part 
 
     tile_parser_eat(parser, TOKEN_WHILE);
     tile_parser_eat(parser, TOKEN_LPAREN);
@@ -99,6 +111,82 @@ tile_ast_t* tile_parser_parse_while_statement(tile_parser_t* parser) {
         .tag = AST_WHILE_STATEMENT,
     });
     return while_statement;
+}
+
+tile_ast_t* tile_parser_parse_if_statement(tile_parser_t* parser) {
+    // if (expression) 
+    // { } // block part 
+
+    tile_parser_eat(parser, TOKEN_IF);
+    tile_parser_eat(parser, TOKEN_LPAREN);
+    tile_ast_t* condition = tile_parser_parse_expression(parser); // condition part
+    tile_parser_eat(parser, TOKEN_RPAREN);
+    tile_ast_t* body = tile_parser_parse_block(parser);
+    printf("if body done");
+    tile_ast_t* altarnate = NULL;
+    if (parser->current_token.type == TOKEN_ELSE) { // 'else'
+        tile_parser_eat(parser, TOKEN_ELSE);
+        if (parser->current_token.type == TOKEN_IF) {  // 'else if'
+            altarnate = tile_parser_parse_if_statement(parser);
+        }
+        else { // There is no 'if', only 'else'
+            altarnate = tile_parser_parse_block(parser);
+        }
+    }
+
+    tile_ast_t* if_statement = tile_ast_create((tile_ast_t){
+        .if_statement.condition = condition,
+        .if_statement.body = body,
+        .if_statement.altarnate = altarnate,
+        .tag = AST_IF_STATEMENT,
+    });
+    
+    return if_statement;
+}
+
+// TODO: Find correct implementation for match
+    // match (x) 
+    // { } // block
+
+tile_ast_t* tile_parser_parse_variable_dec_statement(tile_parser_t* parser) {
+    // int x = 10;
+    // int x;
+
+    const char* type_name = parser->current_token.value;
+    if (parser->current_token.type == TOKEN_INT_KW)
+        tile_parser_eat(parser, TOKEN_INT_KW);
+    else if (parser->current_token.type == TOKEN_FLOAT_KW)
+        tile_parser_eat(parser, TOKEN_FLOAT_KW);
+
+    const char* var_name = parser->current_token.value;
+    tile_parser_eat(parser, TOKEN_ID);
+
+    tile_ast_t* init_expr = NULL;
+    if (parser->current_token.type == TOKEN_ASSIGN) {
+        tile_parser_eat(parser, TOKEN_ASSIGN);
+
+        init_expr = tile_parser_parse_expression(parser);
+    }
+
+    tile_parser_eat(parser, TOKEN_SEMI);
+
+    tile_ast_t* var_decl_statement = tile_ast_create((tile_ast_t) {
+        .variable_decl.type = type_name,
+        .variable_decl.name = var_name,
+        .tag = AST_VARIABLE_DECL,
+    });
+
+    if (init_expr != NULL) {
+        tile_ast_t* var_assign_statement = tile_ast_create((tile_ast_t) {
+            .variable_assign.type = type_name,
+            .variable_assign.name = var_name,
+            .variable_assign.value = init_expr,
+            .tag = AST_VARIABLE_ASSIGN,
+        });
+        return var_assign_statement;
+    }
+
+    return var_decl_statement;
 }
 
 tile_ast_t* tile_parser_parse_block(tile_parser_t* parser) {

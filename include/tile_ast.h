@@ -21,7 +21,7 @@ typedef struct tile_ast {
 
         AST_WHILE_STATEMENT,
         AST_IF_STATEMENT,
-        AST_LOOP,
+        AST_MATCH_STATEMENT,
 
         AST_BLOCK,
     } tag;
@@ -52,10 +52,12 @@ typedef struct tile_ast {
 
         // AST_VARIABLE (declaration, assignment, and usage)
         struct ast_variable_decl {
+            const char* type;
             const char* name;
         } variable_decl;
 
         struct ast_variable_assign {
+            const char* type;
             const char* name;
             struct tile_ast* value;
         } variable_assign;
