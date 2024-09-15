@@ -25,7 +25,6 @@ typedef struct tile_ast {
         AST_OPTION_STATEMENT,
         AST_DEFAULT_STATEMENT,
 
-
         AST_BLOCK,
     } tag;
 
