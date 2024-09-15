@@ -81,6 +81,7 @@ void tile_ast_show(tile_ast_t* node, int indent) {
             printf("Body:\n");
             tile_ast_show(node->while_statement.body, indent + 2);
             break;
+    
         case AST_IF_STATEMENT:
             printf("IfStmt\n");
             print_indent(indent + 1);
@@ -93,7 +94,53 @@ void tile_ast_show(tile_ast_t* node, int indent) {
             printf("Altarnate:\n");
             tile_ast_show(node->if_statement.altarnate, indent + 2);
             break;
-        
+
+        case AST_MATCH_STATEMENT:
+            printf("MatchStmt\n");
+            print_indent(indent + 1);
+            printf("Expression:\n");
+            tile_ast_show(node->match_statement.expression, indent + 2);
+            print_indent(indent + 1);
+            printf("Options:\n");
+            
+            if (node->match_statement.default_option != NULL) {
+                // Match statement has a default option
+                for(size_t i = 0; i < node->match_statement.option_count - 1; i++) {
+                    tile_ast_show(node->match_statement.options[i], indent + 2);
+                }
+                print_indent(indent + 1);
+                printf("Default:\n");
+                tile_ast_show(node->match_statement.default_option, indent + 2);
+                print_indent(indent + 1);
+                break;
+            }
+            else {
+                // Match statement hasn't a default option 
+                for(size_t i = 0; i < node->match_statement.option_count; i++) {
+                    tile_ast_show(node->match_statement.options[i], indent + 1);
+                } 
+            }
+            break;
+        case AST_OPTION_STATEMENT:
+            printf("OptionStmt\n");
+            print_indent(indent + 1);
+            printf("Condition:\n");
+            tile_ast_show(node->option_statement.condition, indent + 2);
+            print_indent(indent + 1);
+            printf("Statements:\n");
+            for(size_t i = 0; i < node->option_statement.statement_count; i++) {
+                tile_ast_show(node->option_statement.statements[i], indent + 2);
+            }
+            break;
+        case AST_DEFAULT_STATEMENT:
+            printf("DefaultStmt\n");
+            print_indent(indent + 1);
+            printf("Statements:\n");
+            for(size_t i = 0; i < node->default_statement.statement_count; i++) {
+                tile_ast_show(node->default_statement.statements[i], indent + 2);
+            }
+            break;
+    
         case AST_BLOCK:
             printf("BLOCK\n");
             for(size_t i = 0; i < node->block.statement_count; i++) {

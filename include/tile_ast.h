@@ -22,6 +22,9 @@ typedef struct tile_ast {
         AST_WHILE_STATEMENT,
         AST_IF_STATEMENT,
         AST_MATCH_STATEMENT,
+        AST_OPTION_STATEMENT,
+        AST_DEFAULT_STATEMENT,
+
 
         AST_BLOCK,
     } tag;
@@ -91,6 +94,24 @@ typedef struct tile_ast {
             struct tile_ast* body;
             struct tile_ast* altarnate; // Optional, can be NULL
         } if_statement;
+
+        struct ast_match_statement {
+            struct tile_ast* expression;
+            struct tile_ast** options;
+            struct tile_ast* default_option;
+            size_t option_count;
+        } match_statement;
+
+        struct ast_option_statement {
+            struct tile_ast* condition;
+            struct tile_ast** statements;
+            size_t statement_count;
+        } option_statement;
+
+        struct ast_default_statement {
+            struct tile_ast** statements;
+            size_t statement_count;
+        } default_statement;
 
         // AST_BLOCK, body parts of functions, if elses '{ }'
         struct ast_block {

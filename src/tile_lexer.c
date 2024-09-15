@@ -56,6 +56,7 @@ static const tile_lextoken_t keywords[] = {
 
     { "match", TOKEN_MATCH },
     { "option", TOKEN_OPTION },
+    { "default", TOKEN_DEFAULT },
     { "break", TOKEN_BREAK },
 
     { "int", TOKEN_INT_KW },

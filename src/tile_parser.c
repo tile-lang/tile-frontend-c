@@ -67,6 +67,10 @@ tile_ast_t* tile_parser_parse_statement(tile_parser_t* parser) {
         return tile_parser_parse_if_statement(parser);
         break;
 
+    case TOKEN_MATCH:
+        return tile_parser_parse_match_statement(parser);
+        break;
+
     case TOKEN_INT_KW:
         return tile_parser_parse_variable_dec_statement(parser);
         break;
@@ -114,7 +118,7 @@ tile_ast_t* tile_parser_parse_while_statement(tile_parser_t* parser) {
 }
 
 tile_ast_t* tile_parser_parse_if_statement(tile_parser_t* parser) {
-    // if (expression) 
+    // if (condition) 
     // { } // block part 
 
     tile_parser_eat(parser, TOKEN_IF);
@@ -122,7 +126,7 @@ tile_ast_t* tile_parser_parse_if_statement(tile_parser_t* parser) {
     tile_ast_t* condition = tile_parser_parse_expression(parser); // condition part
     tile_parser_eat(parser, TOKEN_RPAREN);
     tile_ast_t* body = tile_parser_parse_block(parser);
-    printf("if body done");
+    
     tile_ast_t* altarnate = NULL;
     if (parser->current_token.type == TOKEN_ELSE) { // 'else'
         tile_parser_eat(parser, TOKEN_ELSE);
@@ -144,13 +148,50 @@ tile_ast_t* tile_parser_parse_if_statement(tile_parser_t* parser) {
     return if_statement;
 }
 
-// TODO: Find correct implementation for match
-    // match (x) 
-    // { } // block
+tile_ast_t* tile_parser_parse_match_statement(tile_parser_t* parser) {
+    // match (expression) {
+    //     option condition:
+    //         statements
+    //     option condition:
+    //         statements
+    //     default:
+    //         statements
+    // }
+    tile_parser_eat(parser, TOKEN_MATCH);
+    tile_parser_eat(parser, TOKEN_LPAREN);
+    tile_ast_t* expression = tile_parser_parse_expression(parser);
+    tile_parser_eat(parser, TOKEN_RPAREN);
+    size_t default_number = 0;
+
+    tile_parser_eat(parser, TOKEN_LBRACE);
+    tile_ast_t** options = NULL;
+    tile_ast_t* default_option;
+    while (parser->current_token.type != TOKEN_RBRACE) {
+        if (parser->current_token.type == TOKEN_OPTION) {
+            tile_ast_t* option = tile_parser_parse_option(parser);
+            arrput(options, option);
+        }
+        else if (parser->current_token.type == TOKEN_DEFAULT) {
+            default_option = tile_parser_parse_default_option(parser);
+            default_number++;
+        }
+    }
+    tile_parser_eat(parser, TOKEN_RBRACE);
+    
+    tile_ast_t* match_statement = tile_ast_create((tile_ast_t) {
+        .match_statement.expression = expression,
+        .match_statement.options = options,
+        .match_statement.default_option = default_option,
+        .match_statement.option_count = arrlen(options) + default_number,
+        .tag = AST_MATCH_STATEMENT,
+    });
+    printf("Total count %lld \n", match_statement->match_statement.option_count);
+    return match_statement;
+}
 
 tile_ast_t* tile_parser_parse_variable_dec_statement(tile_parser_t* parser) {
     // int x = 10;
-    // int x;
+    // float x;
 
     const char* type_name = parser->current_token.value;
     if (parser->current_token.type == TOKEN_INT_KW)
@@ -211,4 +252,51 @@ tile_ast_t* tile_parser_parse_block(tile_parser_t* parser) {
         .tag = AST_BLOCK,
     });
     return block;
+}
+
+tile_ast_t* tile_parser_parse_option(tile_parser_t* parser) {
+    // option condition:
+    //     statements
+    // option condition:
+    //     statements
+    tile_parser_eat(parser, TOKEN_OPTION);
+    tile_ast_t* condition = tile_parser_parse_expression(parser);
+    tile_parser_eat(parser, TOKEN_COLON);
+    tile_ast_t** statements = NULL;
+
+    while (parser->current_token.type != TOKEN_OPTION 
+          && parser->current_token.type != TOKEN_DEFAULT 
+          && parser->current_token.type != TOKEN_RBRACE) {
+        tile_ast_t* statement;
+        statement = tile_parser_parse_statement(parser);
+        arrput(statements, statement);
+    }
+
+    tile_ast_t* option = tile_ast_create((tile_ast_t) {
+        .option_statement.condition = condition,
+        .option_statement.statements = statements,
+        .option_statement.statement_count = arrlen(statements),
+        .tag = AST_OPTION_STATEMENT,
+    });
+
+    return option;
+}
+
+tile_ast_t* tile_parser_parse_default_option(tile_parser_t* parser) {
+    // default:
+    //     statements
+    tile_parser_eat(parser, TOKEN_DEFAULT);
+    tile_parser_eat(parser, TOKEN_COLON);
+    tile_ast_t** statements = NULL;
+    while (parser->current_token.type != TOKEN_RBRACE) {
+        tile_ast_t* statement;
+        statement = tile_parser_parse_statement(parser);
+        arrput(statements, statement);
+    }
+    tile_ast_t* default_option = tile_ast_create((tile_ast_t) {
+        .default_statement.statements = statements,
+        .default_statement.statement_count = arrlen(statements),
+        .tag = AST_DEFAULT_STATEMENT,
+    });
+    return default_option;
 }
