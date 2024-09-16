@@ -35,6 +35,8 @@ tile_ast_t* tile_parser_parse_default_option(tile_parser_t* parser);
 
 tile_ast_t* tile_parser_parse_variable_dec_statement(tile_parser_t* parser);
 
+tile_ast_t* tile_parser_parse_variable_assign(tile_parser_t* parser, const char* tpye_name, const char* var_name);
+
 tile_ast_t* tile_parser_parse_block(tile_parser_t* parser);
 
 #endif

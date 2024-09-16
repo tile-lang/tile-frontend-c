@@ -185,7 +185,7 @@ tile_ast_t* tile_parser_parse_match_statement(tile_parser_t* parser) {
         .match_statement.option_count = arrlen(options) + default_number,
         .tag = AST_MATCH_STATEMENT,
     });
-    printf("Total count %lld \n", match_statement->match_statement.option_count);
+    
     return match_statement;
 }
 
@@ -237,8 +237,8 @@ tile_ast_t* tile_parser_parse_default_option(tile_parser_t* parser) {
 }
 
 tile_ast_t* tile_parser_parse_variable_dec_statement(tile_parser_t* parser) {
-    // int x = 10;
-    // float x;
+    // int x;
+    // float y;
 
     const char* type_name = parser->current_token.value;
     if (parser->current_token.type == TOKEN_INT_KW)
@@ -249,32 +249,37 @@ tile_ast_t* tile_parser_parse_variable_dec_statement(tile_parser_t* parser) {
     const char* var_name = parser->current_token.value;
     tile_parser_eat(parser, TOKEN_ID);
 
-    tile_ast_t* init_expr = NULL;
-    if (parser->current_token.type == TOKEN_ASSIGN) {
-        tile_parser_eat(parser, TOKEN_ASSIGN);
-
-        init_expr = tile_parser_parse_expression(parser);
-    }
+    if (parser->current_token.type == TOKEN_ASSIGN)
+        return tile_parser_parse_variable_assign(parser, type_name, var_name);
 
     tile_parser_eat(parser, TOKEN_SEMI);
-
     tile_ast_t* var_decl_statement = tile_ast_create((tile_ast_t) {
         .variable_decl.type = type_name,
         .variable_decl.name = var_name,
         .tag = AST_VARIABLE_DECL,
     });
 
-    if (init_expr != NULL) {
-        tile_ast_t* var_assign_statement = tile_ast_create((tile_ast_t) {
-            .variable_assign.type = type_name,
-            .variable_assign.name = var_name,
-            .variable_assign.value = init_expr,
-            .tag = AST_VARIABLE_ASSIGN,
-        });
-        return var_assign_statement;
-    }
-
     return var_decl_statement;
+}
+
+tile_ast_t* tile_parser_parse_variable_assign(tile_parser_t* parser, const char* type_name, const char* var_name) {
+    // int x = 10;
+    // float y = 7.4;
+    // int z; // TODO: implement this -> first declared z variable and then assign it a value
+    // z = 3;
+
+    tile_parser_eat(parser, TOKEN_ASSIGN);
+    tile_ast_t* expression = tile_parser_parse_expression(parser); // stored value
+    tile_parser_eat(parser, TOKEN_SEMI);
+
+    tile_ast_t* var_assign_statement = tile_ast_create((tile_ast_t) {
+        .variable_assign.type = type_name,
+        .variable_assign.name = var_name,
+        .variable_assign.value = expression,
+        .tag = AST_VARIABLE_ASSIGN,
+    });
+
+    return var_assign_statement;
 }
 
 tile_ast_t* tile_parser_parse_block(tile_parser_t* parser) {
