@@ -59,7 +59,7 @@ typedef struct tile_ast {
         } variable_decl;
 
         struct ast_variable_assign {
-            const char* type;
+            // const char* type;
             const char* name;
             struct tile_ast* value;
         } variable_assign;
