@@ -32,6 +32,7 @@ static const tile_lextoken_t symbols[] = {
     { "=", TOKEN_ASSIGN },
     { ":", TOKEN_COLON },
     { ";", TOKEN_SEMI },
+    { ",", TOKEN_COMMA },
     { "//", TOKEN_COMMENT },
 
     { "+", TOKEN_PLUS },
@@ -56,7 +57,14 @@ static const tile_lextoken_t keywords[] = {
 
     { "match", TOKEN_MATCH },
     { "option", TOKEN_OPTION },
+    { "default", TOKEN_DEFAULT },
     { "break", TOKEN_BREAK },
+
+    { "func", TOKEN_TYPE_KW },
+    { "return", TOKEN_RETURN },
+
+    { "int", TOKEN_TYPE_KW },
+    { "float", TOKEN_TYPE_KW },
 
     { NULL, TOKEN_NONE },
 };
@@ -197,7 +205,7 @@ tile_token_t tile_lexer_collect_id(tile_lexer_t *lexer) {
             return token;
         }
     }
-    token = tile_token_create(TOKEN_ID_LITERAL, val);
+    token = tile_token_create(TOKEN_ID, val);
     return token;
 }
 
