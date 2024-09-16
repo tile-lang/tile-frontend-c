@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
     UNUSED(argv);
 
     tile_lexer_t lexer = tile_lexer_init(
-        "func a(int x, int y): int {int x = 3; return x;}"
+        "func a(int x): int { int a; while (1) {int c = 4; } int b = 3; return b; }"
         , NULL
     );
 
