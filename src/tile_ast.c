@@ -140,7 +140,27 @@ void tile_ast_show(tile_ast_t* node, int indent) {
                 tile_ast_show(node->default_statement.statements[i], indent + 2);
             }
             break;
-    
+
+        case AST_FUNCTION_STATEMENT:
+            printf("FuncStmt\n");
+            print_indent(indent + 1);
+            printf("Arguments:\n");
+            for(size_t i = 0; i < node->function_statement.argument_count; i++) {
+                tile_ast_show(node->function_statement.arguments[i], indent + 2);
+            }
+            tile_ast_show(node->function_statement.return_type, indent + 1);
+            tile_ast_show(node->function_statement.body, indent + 2);
+            break;
+        case AST_FUNCTION_ARGUMENT:
+            printf("Argument\n");
+            print_indent(indent + 1);
+            break;
+        case AST_FUNCTION_RETURN_TYPE:
+            printf("Return type\n");
+            break;
+        case AST_RETURN_STATEMENT:
+            printf("Return Statement\n");
+            break;
         case AST_BLOCK:
             printf("BLOCK\n");
             for(size_t i = 0; i < node->block.statement_count; i++) {

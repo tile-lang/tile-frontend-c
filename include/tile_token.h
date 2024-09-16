@@ -24,10 +24,11 @@ typedef enum {
     TOKEN_OPTION,
     TOKEN_DEFAULT,
     TOKEN_BREAK,
+    //TOKEN_FUNC,
+    TOKEN_RETURN,
 
     // Variable Keywords
-    TOKEN_INT_KW,
-    TOKEN_FLOAT_KW,
+    TOKEN_TYPE_KW,
 
     // Symbols
     TOKEN_LESS,
@@ -40,13 +41,14 @@ typedef enum {
     TOKEN_LPAREN,
     TOKEN_RPAREN,
     TOKEN_LBRACE,
-    TOKEN_RBRACE,
+    TOKEN_RBRACE, // ):int(
     TOKEN_LSQUARE,
     TOKEN_RSQUARE,
 
     TOKEN_ASSIGN,
     TOKEN_COLON,
     TOKEN_SEMI,
+    TOKEN_COMMA,
     TOKEN_COMMENT,
 
     TOKEN_PLUS,

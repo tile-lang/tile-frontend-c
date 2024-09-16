@@ -32,6 +32,7 @@ static const tile_lextoken_t symbols[] = {
     { "=", TOKEN_ASSIGN },
     { ":", TOKEN_COLON },
     { ";", TOKEN_SEMI },
+    { ",", TOKEN_COMMA },
     { "//", TOKEN_COMMENT },
 
     { "+", TOKEN_PLUS },
@@ -59,8 +60,11 @@ static const tile_lextoken_t keywords[] = {
     { "default", TOKEN_DEFAULT },
     { "break", TOKEN_BREAK },
 
-    { "int", TOKEN_INT_KW },
-    { "float", TOKEN_FLOAT_KW },
+    { "func", TOKEN_TYPE_KW },
+    { "return", TOKEN_RETURN },
+
+    { "int", TOKEN_TYPE_KW },
+    { "float", TOKEN_TYPE_KW },
 
     { NULL, TOKEN_NONE },
 };

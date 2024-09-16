@@ -25,6 +25,11 @@ typedef struct tile_ast {
         AST_OPTION_STATEMENT,
         AST_DEFAULT_STATEMENT,
 
+        AST_FUNCTION_STATEMENT,
+        AST_FUNCTION_ARGUMENT,
+        AST_FUNCTION_RETURN_TYPE,
+        AST_RETURN_STATEMENT,
+
         AST_BLOCK,
     } tag;
 
@@ -111,6 +116,27 @@ typedef struct tile_ast {
             struct tile_ast** statements;
             size_t statement_count;
         } default_statement;
+
+        struct ast_function_statement {
+            struct tile_ast* return_type;
+            const char* func_name;
+            struct tile_ast** arguments;
+            size_t argument_count;
+            struct tile_ast* body;
+        } function_statement;
+
+        struct ast_argument {
+            const char* type_name;
+            const char* var_name;
+        } argument;
+
+        struct ast_return_type {
+            const char* type_name;
+        } return_type;
+
+        struct ast_return_statement {
+            struct tile_ast* expression;
+        } return_statement;
 
         // AST_BLOCK, body parts of functions, if elses '{ }'
         struct ast_block {
