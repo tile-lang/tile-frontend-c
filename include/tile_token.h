@@ -12,7 +12,8 @@ typedef enum {
     TOKEN_STRING_LITERAL,
     TOKEN_INT_LITERAL,
     TOKEN_FLOAT_LITERAL,
-    TOKEN_ID_LITERAL,
+
+    TOKEN_ID,
 
     // Keywords
     TOKEN_IF,
@@ -21,7 +22,13 @@ typedef enum {
     TOKEN_WHILE,
     TOKEN_MATCH,
     TOKEN_OPTION,
+    TOKEN_DEFAULT,
     TOKEN_BREAK,
+    //TOKEN_FUNC,
+    TOKEN_RETURN,
+
+    // Variable Keywords
+    TOKEN_TYPE_KW,
 
     // Symbols
     TOKEN_LESS,
@@ -34,13 +41,14 @@ typedef enum {
     TOKEN_LPAREN,
     TOKEN_RPAREN,
     TOKEN_LBRACE,
-    TOKEN_RBRACE,
+    TOKEN_RBRACE, // ):int(
     TOKEN_LSQUARE,
     TOKEN_RSQUARE,
 
     TOKEN_ASSIGN,
     TOKEN_COLON,
     TOKEN_SEMI,
+    TOKEN_COMMA,
     TOKEN_COMMENT,
 
     TOKEN_PLUS,
