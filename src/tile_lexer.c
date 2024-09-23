@@ -175,7 +175,7 @@ tile_token_t tile_lexer_collect_string(tile_lexer_t* lexer) {
     }
     temp_val[len] = '\0';
     len++;
-    char* val = (char*)arena_alloc(lexer->tokens_arena, len);
+    char* val = (char*)arena_alloc(&lexer->tokens_arena, len);
     memmove(val, temp_val, len);
     tile_token_t token = tile_token_create(TOKEN_STRING_LITERAL, val);
     
@@ -196,7 +196,7 @@ tile_token_t tile_lexer_collect_id(tile_lexer_t *lexer) {
     }
     temp_val[len] = '\0';
     len++;
-    char* val = (char*)arena_alloc(lexer->tokens_arena, len);
+    char* val = (char*)arena_alloc(&lexer->tokens_arena, len);
     memmove(val, temp_val, len);
 
     for (int i = 0; keywords[i].text != NULL; i++) {
@@ -236,14 +236,14 @@ tile_token_t tile_lexer_collect_number(tile_lexer_t* lexer) {
     }
     temp_val[len] = '\0';
     len++;
-    char* val = (char*)arena_alloc(lexer->tokens_arena, len);
+    char* val = (char*)arena_alloc(&lexer->tokens_arena, len);
     memmove(val, temp_val, len);
     tile_token_t token = tile_token_create(type, val);
     return token;
 }
 
 char* tile_lexer_get_current_char_as_string(tile_lexer_t* lexer) {
-    char* str = (char*)arena_alloc(lexer->tokens_arena, 2);
+    char* str = (char*)arena_alloc(&lexer->tokens_arena, 2);
     str[0] = lexer->current_char;
     str[1] = '\0';
     return str;
