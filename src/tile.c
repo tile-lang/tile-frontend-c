@@ -28,6 +28,7 @@ int main(int argc, char *argv[]) {
     // }
 
     tile_ast_arena_destroy();
+    tile_ast_destroy(root);
 
     return 0;
 }

@@ -3,6 +3,7 @@
 #define ARENA_IMPLEMENTATION
 
 #include "common/arena.h"
+#include <stb_ds.h>
 
 #define ARENA_SIZE 1024
 
@@ -21,6 +22,40 @@ tile_ast_t* tile_ast_create(tile_ast_t ast) {
     if (ptr)
         *ptr = ast;
     return ptr;
+}
+
+void tile_ast_destroy(tile_ast_t* node) {
+
+    switch (node->tag)
+    {
+    case AST_PROGRAM:
+        for(size_t i = 0; i < node->program.statement_count; i++) {
+            tile_ast_destroy(node->program.statements[i]);
+        }
+        arrfree(node->program.statements);
+        break;
+    
+    // case AST_MATCH_STATEMENT:
+    //     for(size_t i = 0; i < node->match_statement.statement_count; i++) {
+    //         tile_ast_destroy(node->match_statement.options[i]);
+    //     }
+    //     arrfree(node->match_statement.options);
+    //     break;
+
+    case AST_BLOCK:
+        for(size_t i = 0; i < node->block.statement_count; i++) {
+            tile_ast_destroy(node->block.statements[i]);
+        }
+        arrfree(node->block.statements);
+        break;
+
+    case AST_FUNCTION_STATEMENT:
+        arrfree(node->function_statement.arguments);
+        break;
+
+    default:
+        break;
+    }
 }
 
 static void print_indent(int indent) {
