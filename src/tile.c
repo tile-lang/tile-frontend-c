@@ -27,6 +27,7 @@ int main(int argc, char *argv[]) {
     //     printf("TOKEN(%d, %s, Row %d, Col %d)\n", token.type, token.value, lexer.loc.row, lexer.loc.col);
     // }
 
+    tile_lexer_destroy(&lexer);
     tile_ast_arena_destroy();
     tile_ast_destroy(root);
 

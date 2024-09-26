@@ -107,8 +107,8 @@ char* arena_strdup(arena_t* arena, const char *str) {
     void *new = arena_alloc(&arena, len);
     if(new == NULL)
         return NULL;
-    
-    return (char*) memcpy(new, str, len);
+    memcpy(new, str, len);
+    return (char*) new;
 }
 
 

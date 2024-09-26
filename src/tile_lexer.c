@@ -84,6 +84,10 @@ tile_lexer_t tile_lexer_init(const char* src, const char* file_name) {
     return lexer;
 }
 
+void tile_lexer_destroy(tile_lexer_t* lexer) {
+    arena_destroy(lexer->tokens_arena);
+}
+
 void tile_lexer_advance(tile_lexer_t* lexer) {
     if (lexer->current_char == '\n') {
         lexer->loc.row++;

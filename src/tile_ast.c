@@ -42,6 +42,14 @@ void tile_ast_destroy(tile_ast_t* node) {
     //     arrfree(node->match_statement.options);
     //     break;
 
+    case AST_WHILE_STATEMENT:
+        tile_ast_destroy(node->while_statement.body);
+        break;
+    
+    case AST_IF_STATEMENT:
+        tile_ast_destroy(node->if_statement.body);
+        break;
+        
     case AST_BLOCK:
         for(size_t i = 0; i < node->block.statement_count; i++) {
             tile_ast_destroy(node->block.statements[i]);
@@ -51,6 +59,7 @@ void tile_ast_destroy(tile_ast_t* node) {
 
     case AST_FUNCTION_STATEMENT:
         arrfree(node->function_statement.arguments);
+        tile_ast_destroy(node->function_statement.body);
         break;
 
     default:

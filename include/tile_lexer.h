@@ -22,6 +22,7 @@ typedef struct
 
 // lexer_init needs const* char file_name
 tile_lexer_t tile_lexer_init(const char* src, const char* file_name);
+void tile_lexer_destroy(tile_lexer_t* lexer);
 
 void tile_lexer_advance(tile_lexer_t* lexer);
 void tile_lexer_advance_by(tile_lexer_t* lexer, int steps);
