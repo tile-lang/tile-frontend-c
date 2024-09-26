@@ -153,7 +153,6 @@ void tile_ast_show(tile_ast_t* node, int indent) {
             break;
         case AST_FUNCTION_ARGUMENT:
             printf("Argument\n");
-            print_indent(indent + 1);
             break;
         case AST_FUNCTION_RETURN_TYPE:
             printf("Return type\n");
