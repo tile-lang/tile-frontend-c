@@ -151,7 +151,7 @@ tile_token_t tile_lexer_collect_symbol(tile_lexer_t* lexer) {
             for (int i = 0; symbols[i].text != NULL; i++) {
                 if (strcmp(sym, symbols[i].text) == 0) {
                     tile_lexer_advance_by(lexer, len);
-                    return tile_token_create(symbols[i].type, strdup(sym)); // TODO: fix memory leak
+                    return tile_token_create(symbols[i].type, arena_strdup(lexer->tokens_arena, sym));
                 }
             }
         }

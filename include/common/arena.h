@@ -32,6 +32,7 @@ arena_t* arena_grow(arena_t* arena);
 void arena_reset(arena_t* arena);
 void arena_destroy(arena_t* arena);
 
+char* arena_strdup(arena_t* arena, const char *str);
 
 #ifdef ARENA_IMPLEMENTATION
 #undef ARENA_IMPLEMENTATION
@@ -90,7 +91,7 @@ void arena_destroy(arena_t* arena) {
     while (arena->prev != NULL) {
         arena = arena->prev;
     }
-    // Free all
+    // Free allP
     arena_t* next;
     while (arena != NULL) {
         next = arena->next;
@@ -99,6 +100,17 @@ void arena_destroy(arena_t* arena) {
         arena = next;
     }
 }
+
+
+char* arena_strdup(arena_t* arena, const char *str) {
+    size_t len = strlen(str) + 1;
+    void *new = arena_alloc(&arena, len);
+    if(new == NULL)
+        return NULL;
+    
+    return (char*) memcpy(new, str, len);
+}
+
 
 
 
