@@ -3,6 +3,14 @@
 #define STB_DS_IMPLEMENTATION
 #include <stb_ds.h>
 
+static primitive_type tile_parser_parse_primitive_type(tile_parser_t* parser) {
+    if (strcmp("int", parser->current_token.value) == 0)
+        return PRIM_TYPE_INT;
+    if (strcmp("float", parser->current_token.value) == 0)
+        return PRIM_TYPE_FLOAT;
+    return PRIM_TYPE_NONE;
+}
+
 tile_parser_t tile_parser_init(tile_lexer_t* lexer) {
     tile_parser_t parser = {
         .lexer = lexer,
@@ -255,7 +263,7 @@ tile_ast_t* tile_parser_parse_default_option(tile_parser_t* parser) {
 tile_ast_t* tile_parser_parse_variable_dec_statement(tile_parser_t* parser) {
     // int x;
     // float y;
-    const char* type_name = parser->current_token.value;
+    primitive_type type_name = tile_parser_parse_primitive_type(parser);
     tile_parser_eat(parser, TOKEN_TYPE_KW);
 
     const char* var_name = parser->current_token.value;
@@ -315,7 +323,6 @@ tile_ast_t* tile_parser_parse_function_statement(tile_parser_t* parser) {
     }
     while (parser->current_token.type != TOKEN_RPAREN) {
         tile_ast_t* arg;
-        // if (parser->current_token.type == TOKEN_COMMA)
         tile_parser_eat(parser, TOKEN_COMMA);
         arg = tile_parser_parse_function_argument(parser);
         arrput(args, arg);
@@ -324,7 +331,7 @@ tile_ast_t* tile_parser_parse_function_statement(tile_parser_t* parser) {
     tile_parser_eat(parser, TOKEN_RPAREN);
     tile_parser_eat(parser, TOKEN_COLON);
 
-    const char* return_type_name = parser->current_token.value;
+    primitive_type return_type_name = tile_parser_parse_primitive_type(parser);
     tile_ast_t* return_type = tile_ast_create((tile_ast_t) {
         .return_type.type_name = return_type_name,
         .tag = AST_FUNCTION_RETURN_TYPE,
@@ -348,7 +355,7 @@ tile_ast_t* tile_parser_parse_function_statement(tile_parser_t* parser) {
 
 tile_ast_t* tile_parser_parse_function_argument(tile_parser_t* parser) {
     // func name(args): int
-    const char* type_name = parser->current_token.value;
+    primitive_type type_name = tile_parser_parse_primitive_type(parser);
     tile_parser_eat(parser, TOKEN_TYPE_KW);
     const char* var_name = parser->current_token.value;
     tile_parser_eat(parser, TOKEN_ID);
