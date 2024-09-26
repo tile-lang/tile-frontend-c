@@ -309,12 +309,16 @@ tile_ast_t* tile_parser_parse_function_statement(tile_parser_t* parser) {
     tile_parser_eat(parser, TOKEN_LPAREN);
     tile_ast_t** args = NULL;
 
+    if (parser->current_token.type != TOKEN_RPAREN) {
+        tile_ast_t* arg = tile_parser_parse_function_argument(parser);
+        arrput(args, arg);
+    }
     while (parser->current_token.type != TOKEN_RPAREN) {
         tile_ast_t* arg;
+        // if (parser->current_token.type == TOKEN_COMMA)
+        tile_parser_eat(parser, TOKEN_COMMA);
         arg = tile_parser_parse_function_argument(parser);
         arrput(args, arg);
-        if (parser->current_token.type == TOKEN_COMMA)
-            tile_parser_eat(parser, TOKEN_COMMA);
     }
 
     tile_parser_eat(parser, TOKEN_RPAREN);
