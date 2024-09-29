@@ -75,6 +75,7 @@ typedef struct tile_ast {
         struct ast_variable_decl {
             primitive_type type;
             const char* name;
+            struct tile_ast* value;
         } variable_decl;
 
         struct ast_variable_assign {
@@ -171,6 +172,7 @@ void tile_ast_arena_init();
 void tile_ast_arena_destroy();
 
 tile_ast_t* tile_ast_create(tile_ast_t ast);
+void tile_ast_destroy(tile_ast_t* node);
 
 void tile_ast_show(tile_ast_t* node, int indent);
 

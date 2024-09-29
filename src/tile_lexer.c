@@ -84,6 +84,10 @@ tile_lexer_t tile_lexer_init(const char* src, const char* file_name) {
     return lexer;
 }
 
+void tile_lexer_destroy(tile_lexer_t* lexer) {
+    arena_destroy(lexer->tokens_arena);
+}
+
 void tile_lexer_advance(tile_lexer_t* lexer) {
     if (lexer->current_char == '\n') {
         lexer->loc.row++;
@@ -151,7 +155,7 @@ tile_token_t tile_lexer_collect_symbol(tile_lexer_t* lexer) {
             for (int i = 0; symbols[i].text != NULL; i++) {
                 if (strcmp(sym, symbols[i].text) == 0) {
                     tile_lexer_advance_by(lexer, len);
-                    return tile_token_create(symbols[i].type, strdup(sym)); // TODO: fix memory leak
+                    return tile_token_create(symbols[i].type, arena_strdup(lexer->tokens_arena, sym));
                 }
             }
         }

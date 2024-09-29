@@ -95,7 +95,7 @@ tile_ast_t* tile_parser_parse_statement(tile_parser_t* parser) {
             return tile_parser_parse_variable_dec_statement(parser);
         break;
     
-    case TOKEN_ID: // z = 3;
+    case TOKEN_ID:
         return tile_parser_parse_variable_def_statement(parser);
         break;
 
@@ -189,7 +189,7 @@ tile_ast_t* tile_parser_parse_match_statement(tile_parser_t* parser) {
 
     tile_parser_eat(parser, TOKEN_LBRACE);
     tile_ast_t** options = NULL;
-    tile_ast_t* default_option;
+    tile_ast_t* default_option = NULL;
     while (parser->current_token.type != TOKEN_RBRACE) {
         if (parser->current_token.type == TOKEN_OPTION) {
             tile_ast_t* option = tile_parser_parse_option(parser);
@@ -214,8 +214,6 @@ tile_ast_t* tile_parser_parse_match_statement(tile_parser_t* parser) {
 }
 
 tile_ast_t* tile_parser_parse_option(tile_parser_t* parser) {
-    // option condition:
-    //     statements
     // option condition:
     //     statements
     tile_parser_eat(parser, TOKEN_OPTION);
@@ -263,19 +261,23 @@ tile_ast_t* tile_parser_parse_default_option(tile_parser_t* parser) {
 tile_ast_t* tile_parser_parse_variable_dec_statement(tile_parser_t* parser) {
     // int x;
     // float y;
+    // int x = 4;
     primitive_type type_name = tile_parser_parse_primitive_type(parser);
     tile_parser_eat(parser, TOKEN_TYPE_KW);
 
     const char* var_name = parser->current_token.value;
     tile_parser_eat(parser, TOKEN_ID);
-
+    tile_ast_t* expression = NULL;
     if (parser->current_token.type == TOKEN_ASSIGN) {
-        return tile_parser_parse_variable_assign(parser);
+        // this is a decleration with initial value
+        tile_parser_eat(parser, TOKEN_ASSIGN);
+        expression = tile_parser_parse_expression(parser);
     }
     tile_parser_eat(parser, TOKEN_SEMI);
     tile_ast_t* var_decl_statement = tile_ast_create((tile_ast_t) {
         .variable_decl.type = type_name,
         .variable_decl.name = var_name,
+        .variable_decl.value = expression,
         .tag = AST_VARIABLE_DECL,
     });
 
@@ -288,8 +290,6 @@ tile_ast_t* tile_parser_parse_variable_def_statement(tile_parser_t* parser) {
 }
 
 tile_ast_t* tile_parser_parse_variable_assign(tile_parser_t* parser) {
-    // int x = 10;
-    // float y = 7.4;
     // z = 3;
     const char* var_name = parser->prev_token.value;
     tile_parser_eat(parser, TOKEN_ASSIGN);
@@ -306,10 +306,10 @@ tile_ast_t* tile_parser_parse_variable_assign(tile_parser_t* parser) {
 }
 
 tile_ast_t* tile_parser_parse_function_statement(tile_parser_t* parser) {
-    // func name(args): int { //body part start
+    // func name(args): int {
     //  statements
     //  return expression
-    // } // body part end
+    // }
 
     tile_parser_eat(parser, TOKEN_TYPE_KW);
     const char* func_name = parser->current_token.value;

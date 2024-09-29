@@ -3,6 +3,7 @@
 #define ARENA_IMPLEMENTATION
 
 #include "common/arena.h"
+#include <stb_ds.h>
 
 #define ARENA_SIZE 1024
 
@@ -21,6 +22,73 @@ tile_ast_t* tile_ast_create(tile_ast_t ast) {
     if (ptr)
         *ptr = ast;
     return ptr;
+}
+
+void tile_ast_destroy(tile_ast_t* node) {
+
+    switch (node->tag)
+    {
+    case AST_PROGRAM:
+        for(size_t i = 0; i < node->program.statement_count; i++) {
+            tile_ast_destroy(node->program.statements[i]);
+        }
+        arrfree(node->program.statements);
+        break;
+    
+    case AST_MATCH_STATEMENT:
+        if (node->match_statement.default_option != NULL) {
+            // Match statement has a default option
+            for(size_t i = 0; i < node->match_statement.option_count - 1; i++) {
+                tile_ast_destroy(node->match_statement.options[i]);
+            }
+            tile_ast_destroy(node->match_statement.default_option);
+        }
+        else {
+            // Match statement hasn't a default option
+            for(size_t i = 0; i < node->match_statement.option_count; i++) {
+                tile_ast_destroy(node->match_statement.options[i]);
+            } 
+        }
+        arrfree(node->match_statement.options);
+        break;
+
+    case AST_OPTION_STATEMENT:
+        for(size_t i = 0; i < node->option_statement.statement_count; i++) {
+            tile_ast_destroy(node->option_statement.statements[i]);
+        }
+        arrfree(node->option_statement.statements);
+        break;
+
+    case AST_DEFAULT_STATEMENT:
+        for(size_t i = 0; i < node->default_statement.statement_count; i++) {
+            tile_ast_destroy(node->default_statement.statements[i]);
+        }
+        arrfree(node->default_statement.statements);
+        break;        
+
+    case AST_WHILE_STATEMENT:
+        tile_ast_destroy(node->while_statement.body);
+        break;
+    
+    case AST_IF_STATEMENT:
+        tile_ast_destroy(node->if_statement.body);
+        break;
+        
+    case AST_BLOCK:
+        for(size_t i = 0; i < node->block.statement_count; i++) {
+            tile_ast_destroy(node->block.statements[i]);
+        }
+        arrfree(node->block.statements);
+        break;
+
+    case AST_FUNCTION_STATEMENT:
+        arrfree(node->function_statement.arguments);
+        tile_ast_destroy(node->function_statement.body);
+        break;
+
+    default:
+        break;
+    }
 }
 
 static void print_indent(int indent) {
@@ -112,7 +180,6 @@ void tile_ast_show(tile_ast_t* node, int indent) {
                 printf("Default:\n");
                 tile_ast_show(node->match_statement.default_option, indent + 2);
                 print_indent(indent + 1);
-                break;
             }
             else {
                 // Match statement hasn't a default option 
@@ -149,16 +216,30 @@ void tile_ast_show(tile_ast_t* node, int indent) {
                 tile_ast_show(node->function_statement.arguments[i], indent + 2);
             }
             tile_ast_show(node->function_statement.return_type, indent + 1);
-            tile_ast_show(node->function_statement.body, indent + 2);
+            tile_ast_show(node->function_statement.body, indent + 1);
             break;
         case AST_FUNCTION_ARGUMENT:
             printf("Argument\n");
             break;
         case AST_FUNCTION_RETURN_TYPE:
-            printf("Return type\n");
+            printf("Return type:\n");
+            print_indent(indent + 1);
+            switch (node->return_type.type_name) {
+            case PRIM_TYPE_INT:
+                printf("int\n");
+                break;
+            case PRIM_TYPE_FLOAT:
+                printf("float\n");
+                break;
+            default:
+                printf("unknown type\n");
+                break;
+            }
             break;
         case AST_RETURN_STATEMENT:
-            printf("Return Statement\n");
+            printf("Return Statement:\n");
+            // print_indent(indent + 1);
+            tile_ast_show(node->return_statement.expression, indent + 1);
             break;
         case AST_BLOCK:
             printf("BLOCK\n");
