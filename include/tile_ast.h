@@ -75,6 +75,7 @@ typedef struct tile_ast {
         struct ast_variable_decl {
             primitive_type type;
             const char* name;
+            struct tile_ast* value;
         } variable_decl;
 
         struct ast_variable_assign {

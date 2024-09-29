@@ -216,16 +216,30 @@ void tile_ast_show(tile_ast_t* node, int indent) {
                 tile_ast_show(node->function_statement.arguments[i], indent + 2);
             }
             tile_ast_show(node->function_statement.return_type, indent + 1);
-            tile_ast_show(node->function_statement.body, indent + 2);
+            tile_ast_show(node->function_statement.body, indent + 1);
             break;
         case AST_FUNCTION_ARGUMENT:
             printf("Argument\n");
             break;
         case AST_FUNCTION_RETURN_TYPE:
-            printf("Return type\n");
+            printf("Return type:\n");
+            print_indent(indent + 1);
+            switch (node->return_type.type_name) {
+            case PRIM_TYPE_INT:
+                printf("int\n");
+                break;
+            case PRIM_TYPE_FLOAT:
+                printf("float\n");
+                break;
+            default:
+                printf("unknown type\n");
+                break;
+            }
             break;
         case AST_RETURN_STATEMENT:
-            printf("Return Statement\n");
+            printf("Return Statement:\n");
+            // print_indent(indent + 1);
+            tile_ast_show(node->return_statement.expression, indent + 1);
             break;
         case AST_BLOCK:
             printf("BLOCK\n");
