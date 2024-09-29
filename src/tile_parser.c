@@ -189,7 +189,7 @@ tile_ast_t* tile_parser_parse_match_statement(tile_parser_t* parser) {
 
     tile_parser_eat(parser, TOKEN_LBRACE);
     tile_ast_t** options = NULL;
-    tile_ast_t* default_option;
+    tile_ast_t* default_option = NULL;
     while (parser->current_token.type != TOKEN_RBRACE) {
         if (parser->current_token.type == TOKEN_OPTION) {
             tile_ast_t* option = tile_parser_parse_option(parser);
