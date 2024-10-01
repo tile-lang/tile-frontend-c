@@ -1,4 +1,6 @@
 #include <tile_parser.h>
+#include <assert.h>
+#include <stdbool.h>
 
 #define STB_DS_IMPLEMENTATION
 #include <stb_ds.h>
@@ -74,6 +76,7 @@ tile_ast_t* tile_parser_parse_expression(tile_parser_t* parser) {
     default:
     break;
     }
+    assert(false && "TODO: Expression parsing is not totally implemented yet.");
 }
 
 tile_ast_t* tile_parser_parse_statement(tile_parser_t* parser) {
@@ -113,6 +116,7 @@ tile_ast_t* tile_parser_parse_statement(tile_parser_t* parser) {
         tile_parser_eat(parser, TOKEN_UNKNOWN);
         break;
     }
+    return NULL;
 }
 
 tile_ast_t* tile_parser_parse_statements(tile_parser_t* parser) {
