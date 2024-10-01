@@ -12,7 +12,7 @@ typedef struct tile_lextoken_t {
     token_type_t type;
 } tile_lextoken_t;
 
-#define MAX_SYMBOL_LENGTH 2
+#define ARR_LEN(x) sizeof(x)/sizeof(x[0])
 
 static const tile_lextoken_t symbols[] = {
     { "<", TOKEN_LESS },
@@ -42,6 +42,8 @@ static const tile_lextoken_t symbols[] = {
     { "*", TOKEN_MULT },
     { "/", TOKEN_DIV },
 
+
+    { "unknown", TOKEN_UNKNOWN },
     { NULL, TOKEN_NONE },
 };
 
@@ -74,6 +76,7 @@ tile_lexer_t tile_lexer_init(const char* src, const char* file_name) {
         .cursor = 0,
         .prev_char = src[0],
         .current_char = src[0],
+        .next_char = src[0],
         .source_code = src,
         .source_code_size = strlen(src),
         .loc.row = 0,
@@ -95,7 +98,9 @@ void tile_lexer_advance(tile_lexer_t* lexer) {
     }
     if (!tile_lexer_is_at_end(lexer)) {
         lexer->cursor++;
-        lexer->current_char = lexer->source_code[lexer->cursor];
+        lexer->prev_char = lexer->current_char;
+        lexer->current_char = lexer->next_char;
+        lexer->next_char = lexer->source_code[lexer->cursor];
         lexer->loc.col++;
     }
 }
@@ -120,54 +125,43 @@ char tile_lexer_peek(tile_lexer_t* lexer) {
 }
 
 tile_token_t tile_lexer_get_next_token(tile_lexer_t* lexer) {
-        
-    tile_token_t token = tile_token_create(TOKEN_NONE, NULL);
-
     if (isspace(lexer->current_char))
         tile_lexer_skip_whitespace(lexer);
-            
-    if (tile_lexer_is_at_end(lexer))
-        token = tile_token_create(TOKEN_EOF, "eof");
-            
-    if (lexer->current_char != '\0') {
-        switch (lexer->current_char){
-            case '\"':
-            token = tile_lexer_collect_string(lexer);
-            break;
-        default:
-            if (isalpha(lexer->current_char) || lexer->current_char == '_')
-                token = tile_lexer_collect_id(lexer);
-            else if (isdigit(lexer->current_char)) 
-                token = tile_lexer_collect_number(lexer);
-            else
-                token = tile_lexer_collect_symbol(lexer);      
-        }
-    }
-    return token;
+    if (isdigit(lexer->current_char))
+        return tile_lexer_collect_number(lexer);
+    if (isalpha(lexer->current_char) || lexer->current_char == '_')
+        return tile_lexer_collect_id(lexer);
+    if (lexer->current_char == '\"')
+        return tile_lexer_collect_string(lexer);
+
+    return tile_lexer_collect_symbol(lexer);
 }
 
 tile_token_t tile_lexer_collect_symbol(tile_lexer_t* lexer) {
-    for (int len = MAX_SYMBOL_LENGTH; len > 0; len--) {
-        if (lexer->cursor + len <= lexer->source_code_size) {
-            char sym[MAX_SYMBOL_LENGTH + 1] = {0};
-            strncpy(sym, &lexer->source_code[lexer->cursor], len);
-            sym[len] = '\0';
-            for (int i = 0; symbols[i].text != NULL; i++) {
-                if (strcmp(sym, symbols[i].text) == 0) {
-                    tile_lexer_advance_by(lexer, len);
-                    return tile_token_create(symbols[i].type, arena_strdup(lexer->tokens_arena, sym));
-                }
+    for (size_t i = 0; i < ARR_LEN(symbols); i++) {
+        if (lexer->current_char == EOF)
+            return tile_token_create(TOKEN_EOF, "eof");
+        if (symbols[i].type == TOKEN_UNKNOWN){
+            tile_lexer_advance(lexer);
+            return tile_token_create(TOKEN_UNKNOWN, "unknown");
+        }
+        if (strlen(symbols[i].text) == 1) {
+            if (lexer->current_char == symbols[i].text[0]) {
+                tile_lexer_advance(lexer);
+                return tile_token_create(symbols[i].type, arena_strdup(lexer->tokens_arena, symbols[i].text));
+            }
+        }
+        else if (strlen(symbols[i].text) == 2) {
+            if (lexer->current_char == symbols[i].text[0] && lexer->next_char == symbols[i].text[1]) {
+                tile_lexer_advance_by(lexer, 2);
+                return tile_token_create(symbols[i].type, arena_strdup(lexer->tokens_arena, symbols[i].text));
             }
         }
     }
-    char* c = tile_lexer_get_current_char_as_string(lexer);
-    tile_token_t token = tile_token_create(TOKEN_UNKNOWN, c);
-    tile_lexer_advance(lexer);
-    return token; // No matching symbol found
+    return tile_token_create(TOKEN_NONE, NULL);
 }
 
 tile_token_t tile_lexer_collect_string(tile_lexer_t* lexer) {
-
     tile_lexer_advance(lexer); // skip opening '"'
 
     size_t len = 0;
@@ -181,17 +175,14 @@ tile_token_t tile_lexer_collect_string(tile_lexer_t* lexer) {
     len++;
     char* val = (char*)arena_alloc(&lexer->tokens_arena, len);
     memmove(val, temp_val, len);
-    tile_token_t token = tile_token_create(TOKEN_STRING_LITERAL, val);
-    
     tile_lexer_advance(lexer); // skip closing '"'
 
-    return token;
+    return tile_token_create(TOKEN_STRING_LITERAL, val);
 }
 
 tile_token_t tile_lexer_collect_id(tile_lexer_t *lexer) {
     size_t len = 0;
     char temp_val[128];
-    tile_token_t token;
 
     while (isalnum(lexer->current_char) || lexer->current_char == '_') {
         temp_val[len] = lexer->current_char;
@@ -205,12 +196,10 @@ tile_token_t tile_lexer_collect_id(tile_lexer_t *lexer) {
 
     for (int i = 0; keywords[i].text != NULL; i++) {
         if (strcmp(val, keywords[i].text) == 0) {
-            token = tile_token_create(keywords[i].type, keywords[i].text);
-            return token;
+            return tile_token_create(keywords[i].type, keywords[i].text);
         }
     }
-    token = tile_token_create(TOKEN_ID, val);
-    return token;
+    return tile_token_create(TOKEN_ID, val);
 }
 
 tile_token_t tile_lexer_collect_number(tile_lexer_t* lexer) {

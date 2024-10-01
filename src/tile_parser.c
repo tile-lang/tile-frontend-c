@@ -25,7 +25,10 @@ void tile_parser_eat(tile_parser_t* parser, token_type_t token_type) {
     if (parser->current_token.type != token_type) {
         // TODO: print row and col of unexpected token
         printf(
-            "Unexpected token %s, with type %d, Expected was %d\n",
+            "%s:%d:%d:Unexpected token %s, with type %d, Expected was %d\n",
+            parser->lexer->loc.file_name,
+            parser->lexer->loc.row,
+            parser->lexer->loc.col,
             parser->current_token.value,
             parser->current_token.type,
             token_type
@@ -103,8 +106,12 @@ tile_ast_t* tile_parser_parse_statement(tile_parser_t* parser) {
         return tile_parser_parse_return_statement(parser);
         break;
     
+    case TOKEN_UNKNOWN:
     default:
-    break;
+        //TODO: implement an err function or something
+        tile_parser_eat(parser, 1000);
+        tile_parser_eat(parser, TOKEN_UNKNOWN);
+        break;
     }
 }
 

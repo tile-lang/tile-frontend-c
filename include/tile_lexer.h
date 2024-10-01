@@ -14,6 +14,7 @@ typedef struct
     size_t cursor;
     char prev_char;
     char current_char;
+    char next_char;
     const char* source_code;
     size_t source_code_size;
     tile_loc_t loc;
