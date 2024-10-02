@@ -3,6 +3,8 @@
 #include <string.h>
 #include <tile_cli_parser.h>
 #include <tile_lexer.h>
+#include <tile_parser.h>
+#include <tile_ast.h>
 
 #define VERSION "1.0.0"
 #define HELP_TEXT \
@@ -26,7 +28,6 @@ void handle_input_output(const char* input_file, const char* output_file) {
     FILE* outfile = NULL;
     char buffer[256];
     tile_lexer_t lexer;
-    tile_token_t token;
     
     if (input_file) {
         infile = fopen(input_file, "r");
@@ -56,14 +57,13 @@ void handle_input_output(const char* input_file, const char* output_file) {
     while (fgets(buffer, sizeof(buffer), infile)) {
         lexer = tile_lexer_init(buffer, NULL);
         
-        token = tile_lexer_get_next_token(&lexer);
-        while (token.type != TOKEN_EOF) {
-            // Write each token to the output file
-            fprintf(outfile, "TOKEN(%d, %s, Row %d, Col %d)\n", 
-                    token.type, token.value, lexer.loc.row, lexer.loc.col);
-            
-            token = tile_lexer_get_next_token(&lexer);
-        }
+        tile_ast_arena_init();
+        tile_parser_t parser = tile_parser_init(&lexer);
+        tile_parser_eat(&parser, TOKEN_NONE);
+        tile_ast_t* root = tile_parser_parse_statements(&parser);
+        tile_ast_show(root, 0);
+    
+        tile_ast_arena_destroy();
     }
 
     fclose(infile);
@@ -76,6 +76,10 @@ void parse_args(int argc, char *argv[]) {
 
     if (argc == 1) // if there is no input file provided return
         return;
+    // if (argc == 1) { // If no arguments are provided, show help by default
+    //     print_help();
+    //     exit(EXIT_FAILURE);
+    // }
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--version") == 0 || strcmp(argv[i], "-v") == 0) {
@@ -112,9 +116,4 @@ void parse_args(int argc, char *argv[]) {
 
     handle_input_output(input_file, output_file);
 
-    // If no arguments are provided, show help by default
-    // if (argc == 1) {
-    //     print_help();
-    //     exit(EXIT_FAILURE);
-    // }
 }
