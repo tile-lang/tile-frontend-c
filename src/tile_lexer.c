@@ -84,6 +84,10 @@ tile_lexer_t tile_lexer_init(const char* src, const char* file_name) {
     return lexer;
 }
 
+void tile_lexer_destroy(tile_lexer_t* lexer) {
+    arena_destroy(lexer->tokens_arena);
+}
+
 void tile_lexer_advance(tile_lexer_t* lexer) {
     if (lexer->current_char == '\n') {
         lexer->loc.row++;
@@ -151,7 +155,7 @@ tile_token_t tile_lexer_collect_symbol(tile_lexer_t* lexer) {
             for (int i = 0; symbols[i].text != NULL; i++) {
                 if (strcmp(sym, symbols[i].text) == 0) {
                     tile_lexer_advance_by(lexer, len);
-                    return tile_token_create(symbols[i].type, strdup(sym));
+                    return tile_token_create(symbols[i].type, arena_strdup(lexer->tokens_arena, sym));
                 }
             }
         }
@@ -175,7 +179,7 @@ tile_token_t tile_lexer_collect_string(tile_lexer_t* lexer) {
     }
     temp_val[len] = '\0';
     len++;
-    char* val = (char*)arena_alloc(lexer->tokens_arena, len);
+    char* val = (char*)arena_alloc(&lexer->tokens_arena, len);
     memmove(val, temp_val, len);
     tile_token_t token = tile_token_create(TOKEN_STRING_LITERAL, val);
     
@@ -196,7 +200,7 @@ tile_token_t tile_lexer_collect_id(tile_lexer_t *lexer) {
     }
     temp_val[len] = '\0';
     len++;
-    char* val = (char*)arena_alloc(lexer->tokens_arena, len);
+    char* val = (char*)arena_alloc(&lexer->tokens_arena, len);
     memmove(val, temp_val, len);
 
     for (int i = 0; keywords[i].text != NULL; i++) {
@@ -236,14 +240,14 @@ tile_token_t tile_lexer_collect_number(tile_lexer_t* lexer) {
     }
     temp_val[len] = '\0';
     len++;
-    char* val = (char*)arena_alloc(lexer->tokens_arena, len);
+    char* val = (char*)arena_alloc(&lexer->tokens_arena, len);
     memmove(val, temp_val, len);
     tile_token_t token = tile_token_create(type, val);
     return token;
 }
 
 char* tile_lexer_get_current_char_as_string(tile_lexer_t* lexer) {
-    char* str = (char*)arena_alloc(lexer->tokens_arena, 2);
+    char* str = (char*)arena_alloc(&lexer->tokens_arena, 2);
     str[0] = lexer->current_char;
     str[1] = '\0';
     return str;

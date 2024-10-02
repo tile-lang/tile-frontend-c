@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
     UNUSED(argv);
 
     tile_lexer_t lexer = tile_lexer_init(
-        "func a(int x, int y): int {int x = 3; return x;}"
+        "func name(int z, int b): int { int y = 1; int x; x = 4; return x;}"
         , NULL
     );
 
@@ -27,7 +27,9 @@ int main(int argc, char *argv[]) {
     //     printf("TOKEN(%d, %s, Row %d, Col %d)\n", token.type, token.value, lexer.loc.row, lexer.loc.col);
     // }
 
+    tile_lexer_destroy(&lexer);
     tile_ast_arena_destroy();
+    tile_ast_destroy(root);
 
     return 0;
 }
