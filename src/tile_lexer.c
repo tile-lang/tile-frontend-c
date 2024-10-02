@@ -3,9 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 #include <common/arena.h>
+#include <common/cmd_colors.h>
+#include <stb_ds.h>
 
-#define TOKENS_ARENA_CAPACITY 2048
+#define LEXER_ARENA_CAPACITY 2048
 
 typedef struct tile_lextoken_t {
     char* text;
@@ -79,16 +82,18 @@ tile_lexer_t tile_lexer_init(const char* src, const char* file_name) {
         .next_char = src[0],
         .source_code = src,
         .source_code_size = strlen(src),
+        .line_lengths = NULL,
         .loc.row = 0,
         .loc.col = 0,
         .loc.file_name =  file_name,
-        .tokens_arena = arena_init(TOKENS_ARENA_CAPACITY),
+        .arena = arena_init(LEXER_ARENA_CAPACITY),
     };
     return lexer;
 }
 
 void tile_lexer_destroy(tile_lexer_t* lexer) {
-    arena_destroy(lexer->tokens_arena);
+    arena_destroy(lexer->arena);
+    arrfree(lexer->line_lengths);
 }
 
 void tile_lexer_advance(tile_lexer_t* lexer) {
@@ -105,23 +110,63 @@ void tile_lexer_advance(tile_lexer_t* lexer) {
     }
 }
 
-void tile_lexer_advance_by(tile_lexer_t* lexer, int steps) {
-    for (int i = 0; i < steps; i++) {
+void tile_lexer_advance_by(tile_lexer_t* lexer, size_t steps) {
+    //assert() if no way to advance that step
+    for (size_t i = 0; i < steps; i++) {
         tile_lexer_advance(lexer);
     }
 }
 
 void tile_lexer_skip_whitespace(tile_lexer_t* lexer) {
     while (isspace(lexer->current_char)) {
+        if (lexer->current_char == '\n')
+            arrput(lexer->line_lengths, lexer->loc.col);
         tile_lexer_advance(lexer);
-    }    
+    }
+}
+
+void tile_lexer_skip_line(tile_lexer_t* lexer) {
+    while (lexer->current_char != '\n' && lexer->current_char != EOF)
+        tile_lexer_advance(lexer);
 }
 
 // Peek function checks the next character without advancing
-char tile_lexer_peek(tile_lexer_t* lexer) {
-    if(tile_lexer_is_at_end(lexer))
+static char tile_lexer_peek_upgraded(tile_lexer_t* lexer, bool reset) {
+    static size_t peek = 0;
+    if(peek + lexer->cursor >= lexer->source_code_size)
         return '\0';
-    return lexer->source_code[lexer->cursor + 1];
+    peek++;
+    if (reset)
+        peek = 0;
+    return lexer->source_code[lexer->cursor + peek - 1];
+}
+
+char tile_lexer_peek(tile_lexer_t *lexer) {
+    return tile_lexer_peek_upgraded(lexer, false);
+}
+
+void tile_lexer_peek_reset(tile_lexer_t *lexer) {
+    tile_lexer_peek_upgraded(lexer, true);
+}
+
+size_t tile_lexer_peek_until_endline(tile_lexer_t* lexer, char* character) {
+    size_t count = 0;
+    *character = 0;
+    while (*character != '\n' && *character != EOF) {
+        *character = tile_lexer_peek(lexer);
+        count++;
+    }
+    tile_lexer_peek_reset(lexer);
+    return count;
+}
+
+const char* tile_lexer_get_line(tile_lexer_t *lexer, size_t row, size_t* character_count) {
+    // lexer->source_code[lexer->cursor - 1];
+    // lexer->line_lengths[lexer->loc.row - 1];
+    (void)lexer;
+    (void)row;
+    (void)character_count;
+    return NULL;
 }
 
 tile_token_t tile_lexer_get_next_token(tile_lexer_t* lexer) {
@@ -133,6 +178,11 @@ tile_token_t tile_lexer_get_next_token(tile_lexer_t* lexer) {
         return tile_lexer_collect_id(lexer);
     if (lexer->current_char == '\"')
         return tile_lexer_collect_string(lexer);
+    if (lexer->current_char == '/' && tile_lexer_peek(lexer) == '/') {
+        tile_lexer_peek_reset(lexer);
+        tile_lexer_skip_line(lexer);
+        return tile_token_create(TOKEN_COMMENT, "//");
+    }
 
     return tile_lexer_collect_symbol(lexer);
 }
@@ -148,13 +198,13 @@ tile_token_t tile_lexer_collect_symbol(tile_lexer_t* lexer) {
         if (strlen(symbols[i].text) == 1) {
             if (lexer->current_char == symbols[i].text[0]) {
                 tile_lexer_advance(lexer);
-                return tile_token_create(symbols[i].type, arena_strdup(lexer->tokens_arena, symbols[i].text));
+                return tile_token_create(symbols[i].type, arena_strdup(lexer->arena, symbols[i].text));
             }
         }
         else if (strlen(symbols[i].text) == 2) {
             if (lexer->current_char == symbols[i].text[0] && lexer->next_char == symbols[i].text[1]) {
                 tile_lexer_advance_by(lexer, 2);
-                return tile_token_create(symbols[i].type, arena_strdup(lexer->tokens_arena, symbols[i].text));
+                return tile_token_create(symbols[i].type, arena_strdup(lexer->arena, symbols[i].text));
             }
         }
     }
@@ -163,17 +213,32 @@ tile_token_t tile_lexer_collect_symbol(tile_lexer_t* lexer) {
 
 tile_token_t tile_lexer_collect_string(tile_lexer_t* lexer) {
     tile_lexer_advance(lexer); // skip opening '"'
-
     size_t len = 0;
     char temp_val[128];
+
+    size_t line_end = 0;
+    char c = tile_lexer_peek(lexer);
+    while (c != '\n' && c != EOF) {
+        line_end++;
+        c = tile_lexer_peek(lexer);
+    }
+    tile_lexer_peek_reset(lexer);
     while (lexer->current_char != '"') {
+         if (len > line_end) {
+            printf("%s:%d:%d: "CLR_RED"ERROR"CLR_END" missing string quota '\"'\n",
+                lexer->loc.file_name,
+                lexer->loc.row,
+                lexer->loc.col
+            );
+            break;
+        }
         temp_val[len] = lexer->current_char;
         len++;
         tile_lexer_advance(lexer);
     }
     temp_val[len] = '\0';
     len++;
-    char* val = (char*)arena_alloc(&lexer->tokens_arena, len);
+    char* val = (char*)arena_alloc(&lexer->arena, len);
     memmove(val, temp_val, len);
     tile_lexer_advance(lexer); // skip closing '"'
 
@@ -191,7 +256,7 @@ tile_token_t tile_lexer_collect_id(tile_lexer_t *lexer) {
     }
     temp_val[len] = '\0';
     len++;
-    char* val = (char*)arena_alloc(&lexer->tokens_arena, len);
+    char* val = (char*)arena_alloc(&lexer->arena, len);
     memmove(val, temp_val, len);
 
     for (int i = 0; keywords[i].text != NULL; i++) {
@@ -229,17 +294,10 @@ tile_token_t tile_lexer_collect_number(tile_lexer_t* lexer) {
     }
     temp_val[len] = '\0';
     len++;
-    char* val = (char*)arena_alloc(&lexer->tokens_arena, len);
+    char* val = (char*)arena_alloc(&lexer->arena, len);
     memmove(val, temp_val, len);
     tile_token_t token = tile_token_create(type, val);
     return token;
-}
-
-char* tile_lexer_get_current_char_as_string(tile_lexer_t* lexer) {
-    char* str = (char*)arena_alloc(&lexer->tokens_arena, 2);
-    str[0] = lexer->current_char;
-    str[1] = '\0';
-    return str;
 }
 
 int tile_lexer_is_at_end(tile_lexer_t* lexer) {
