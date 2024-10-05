@@ -1,0 +1,10 @@
+
+
+func max(int a, int b): int {
+    if (a) {
+        return b;
+    } else {
+        return a;
+        $
+    }
+}

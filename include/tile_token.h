@@ -41,7 +41,7 @@ typedef enum {
     TOKEN_LPAREN,
     TOKEN_RPAREN,
     TOKEN_LBRACE,
-    TOKEN_RBRACE, // ):int(
+    TOKEN_RBRACE,
     TOKEN_LSQUARE,
     TOKEN_RSQUARE,
 
@@ -63,8 +63,14 @@ typedef enum {
 } token_type_t;
 
 typedef struct {
+    size_t row, col;
+    const char* file_name;
+} tile_loc_t;
+
+typedef struct {
     token_type_t type;
     char* value;
+    tile_loc_t loc;
 } tile_token_t;
 
 tile_token_t tile_token_create(token_type_t type, char* value);
