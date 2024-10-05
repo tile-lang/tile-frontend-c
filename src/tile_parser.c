@@ -1,4 +1,6 @@
 #include <tile_parser.h>
+#include <assert.h>
+#include <stdbool.h>
 
 #define STB_DS_IMPLEMENTATION
 #include <stb_ds.h>
@@ -25,7 +27,10 @@ void tile_parser_eat(tile_parser_t* parser, token_type_t token_type) {
     if (parser->current_token.type != token_type) {
         // TODO: print row and col of unexpected token
         printf(
-            "Unexpected token %s, with type %d, Expected was %d\n",
+            "%s:%d:%d:Unexpected token %s, with type %d, Expected was %d\n",
+            parser->lexer->loc.file_name,
+            parser->lexer->loc.row,
+            parser->lexer->loc.col,
             parser->current_token.value,
             parser->current_token.type,
             token_type
@@ -59,6 +64,15 @@ tile_ast_t* tile_parser_parse_expression(tile_parser_t* parser) {
             .tag = AST_LITERAL_FLOAT,
         });
         break;
+    
+    case TOKEN_STRING_LITERAL:
+        tile_parser_eat(parser, TOKEN_STRING_LITERAL);
+        return tile_ast_create((tile_ast_t) {
+            .string.text_value = parser->current_token.value,
+            .string.string_value = NULL, // fşx the AST of this (add length) no need to have text_value
+            .tag = AST_LITERAL_STRING,
+        });
+        break;
 
     case TOKEN_ID:
         tile_parser_eat(parser, TOKEN_ID);
@@ -71,6 +85,7 @@ tile_ast_t* tile_parser_parse_expression(tile_parser_t* parser) {
     default:
     break;
     }
+    assert(false && "TODO: Expression parsing is not totally implemented yet.");
 }
 
 tile_ast_t* tile_parser_parse_statement(tile_parser_t* parser) {
@@ -103,9 +118,18 @@ tile_ast_t* tile_parser_parse_statement(tile_parser_t* parser) {
         return tile_parser_parse_return_statement(parser);
         break;
     
+    case TOKEN_COMMENT:
+        tile_parser_eat(parser, TOKEN_COMMENT);
+        break;
+
+    case TOKEN_UNKNOWN:
     default:
-    break;
+        //TODO: implement an err function or something
+        tile_parser_eat(parser, 1000);
+        tile_parser_eat(parser, TOKEN_UNKNOWN);
+        break;
     }
+    return NULL;
 }
 
 tile_ast_t* tile_parser_parse_statements(tile_parser_t* parser) {
