@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <tile_token.h>
 #include <tile_parser.h>
-#include <tile_type_system.h>
+// #include <tile_type_system.h>
 #include <common/cmd_colors.h>
 // #include <tile_cli_parser.h>
 #define UNUSED(x) (void)(x)
@@ -45,7 +45,7 @@ char* read_file_content(const char* file_name) {
 int main(int argc, char *argv[]) {
     // parse_args(argc, argv);  // Use the tile_cli_parser to handle arguments
     UNUSED(argc);
-    UNUSED(argv);
+    // UNUSED(argv);
 
     src_arena = arena_init(4096);
     const char* const file_content = read_file_content(argv[1]);

@@ -18,6 +18,8 @@ void tile_parser_eat(tile_parser_t* parser, token_type_t token_type);
 
 tile_ast_t* tile_parser_parse_expression(tile_parser_t* parser);
 
+tile_ast_t* tile_parser_parse_binary_expression(tile_parser_t* parser, tile_ast_t* left);
+
 tile_ast_t* tile_parser_parse_statement(tile_parser_t* parser);
 
 tile_ast_t* tile_parser_parse_statements(tile_parser_t* parser);

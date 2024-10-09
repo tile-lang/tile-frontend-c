@@ -45,47 +45,96 @@ void tile_parser_eat(tile_parser_t* parser, token_type_t token_type) {
 tile_ast_t* tile_parser_parse_expression(tile_parser_t* parser) {
     // "test"
     // 3
+    tile_ast_t* left;
     switch (parser->current_token.type) {
     
     case TOKEN_INT_LITERAL:
-        tile_parser_eat(parser, TOKEN_INT_LITERAL);
-        return tile_ast_create((tile_ast_t) {
-            .number.text_value = parser->current_token.value,
-            .number.value = atoi(parser->current_token.value), // atoi: string -> int casting
-            .tag = AST_LITERAL_INT,
+        left = tile_ast_create((tile_ast_t) {
+            .expression.number.text_value = parser->current_token.value,
+            .expression.number.ivalue = atoi(parser->current_token.value),
+            .expression.expression_kind = EXPR_LIT_INT,
+            .tag = AST_EXPRESSION,
         });
+        tile_parser_eat(parser, TOKEN_INT_LITERAL);
         break;
     
     case TOKEN_FLOAT_LITERAL:
-        tile_parser_eat(parser, TOKEN_FLOAT_LITERAL);
-        return tile_ast_create((tile_ast_t) {
-            .number.text_value = parser->current_token.value,
-            .number.fvalue = atof(parser->current_token.value),
-            .tag = AST_LITERAL_FLOAT,
+        left = tile_ast_create((tile_ast_t) {
+            .expression.number.text_value = parser->current_token.value,
+            .expression.number.fvalue = atof(parser->current_token.value),
+            .expression.expression_kind = EXPR_LIT_FLOAT,
+            .tag = AST_EXPRESSION,
         });
+        tile_parser_eat(parser, TOKEN_FLOAT_LITERAL);
         break;
     
     case TOKEN_STRING_LITERAL:
-        tile_parser_eat(parser, TOKEN_STRING_LITERAL);
-        return tile_ast_create((tile_ast_t) {
-            .string.text_value = parser->current_token.value,
-            .string.string_value = NULL, // fşx the AST of this (add length) no need to have text_value
-            .tag = AST_LITERAL_STRING,
+        left = tile_ast_create((tile_ast_t) {
+            .expression.string.text_value = parser->current_token.value,
+            .expression.string.string_value = parser->current_token.value,
+            .expression.string.length = strlen(parser->current_token.value),
+            .expression.expression_kind = EXPR_LIT_STRING,
+            .tag = AST_EXPRESSION,
         });
+        tile_parser_eat(parser, TOKEN_STRING_LITERAL);
         break;
 
     case TOKEN_ID:
-        tile_parser_eat(parser, TOKEN_ID);
-        return tile_ast_create((tile_ast_t) {
-            .variable.name = parser->current_token.value,
-            .tag = AST_VARIABLE,
+        left = tile_ast_create((tile_ast_t) {
+            .expression.variable.name = parser->current_token.value,
+            .expression.expression_kind = EXPR_VARIABLE,
+            .tag = AST_EXPRESSION,
         });
+        tile_parser_eat(parser, TOKEN_ID);
         break;
 
     default:
     break;
     }
-    assert(false && "TODO: Expression parsing is not totally implemented yet.");
+    // assert(false && "TODO: Expression parsing is not totally implemented yet.");
+    return tile_parser_parse_binary_expression(parser, left);
+}
+
+tile_ast_t* tile_parser_parse_binary_expression(tile_parser_t* parser, tile_ast_t* left) {
+    while (parser->current_token.type == TOKEN_PLUS  ||
+           parser->current_token.type == TOKEN_MINUS ||
+           parser->current_token.type == TOKEN_STAR  ||
+           parser->current_token.type == TOKEN_SLASH) {
+        binary_operator_t op;
+        switch (parser->current_token.type) {
+            case TOKEN_PLUS:
+                op = OP_ADD;
+            break;
+        
+            case TOKEN_MINUS:
+                op = OP_SUB;
+            break;
+
+            case TOKEN_STAR:
+                op = OP_MULT;
+            break;
+        
+            case TOKEN_SLASH:
+                op = OP_DIV;
+            break;
+        
+            default:
+                // TODO: write a valid default case
+            break;
+        }
+        tile_parser_eat(parser, parser->current_token.type);
+
+        tile_ast_t* right = tile_parser_parse_expression(parser);
+
+        left = tile_ast_create((tile_ast_t) {
+            .expression.binary_expr.op = op,
+            .expression.binary_expr.left = left,
+            .expression.binary_expr.right = right,
+            .expression.expression_kind = EXPR_BINARY,
+            .tag = AST_EXPRESSION,
+        });
+    }
+    return left;
 }
 
 tile_ast_t* tile_parser_parse_statement(tile_parser_t* parser) {

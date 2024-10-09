@@ -53,11 +53,12 @@ typedef enum {
 
     TOKEN_PLUS,
     TOKEN_MINUS,
+    TOKEN_STAR,
+    TOKEN_SLASH,
+
     TOKEN_INC,
     TOKEN_DEC,
-    TOKEN_MULT,
-    TOKEN_DIV,
-
+    
     TOKEN_UNKNOWN,  // For unknown or unrecognized tokens
     TOKEN_EOF,
 } token_type_t;

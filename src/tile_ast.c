@@ -105,39 +105,59 @@ void tile_ast_show(tile_ast_t* node, int indent) {
         case AST_NONE:
             printf("NONE\n");
             break;
+
         case AST_PROGRAM:
             printf("PROGRAM\n");
             for (size_t i = 0; i < node->program.statement_count; i++) {
                 tile_ast_show(node->program.statements[i], indent + 1);
             }
             break;
-        
-        // LITERALS
-        case AST_LITERAL_INT:
-            printf("LITERAL_INT\n");
-            break;
-        case AST_LITERAL_FLOAT:
-            printf("LITERAL_FLOAT\n");
-            break;
-        case AST_LITERAL_STRING:
-            printf("LITERAL_STRING\n");
+
+        // EXPRESSIONS
+        case AST_EXPRESSION:
+            switch (node->expression.expression_kind) {
+                case EXPR_VARIABLE:
+                    printf("EXPR_VARIABLE\n");
+                break;
+                
+                case EXPR_LIT_INT:
+                    printf("EXPR_LIT_INT\n");
+                break;
+                
+                case EXPR_LIT_FLOAT:
+                    printf("EXPR_LIT_FLOAT\n");
+                break;
+                
+                case EXPR_LIT_STRING:
+                    printf("EXPR_LIT_STRING\n");
+                break;
+                
+                case EXPR_BINARY:
+                    printf("EXPR_BINARY\n");
+                    tile_ast_show(node->expression.binary_expr.left, indent + 2);
+                    print_indent(indent + 2);
+                    printf("%d\n", node->expression.binary_expr.op);
+                    tile_ast_show(node->expression.binary_expr.right, indent + 2);
+                break;
+                
+                case EXPR_UNARY:
+                    printf("EXPR_UNARY\n");
+                break;
+
+                default:
+                    printf("\n");
+                break;
+            }
             break;
 
         case AST_VARIABLE_DECL:
             printf("VARIABLE_DECL\n");
-            break;
-        case AST_VARIABLE_ASSIGN:
-            printf("VARIABLE_ASSIGN\n");
-            break;
-        case AST_VARIABLE:
-            printf("VARIABLE\n");
+            tile_ast_show(node->variable_decl.value, indent + 2);
             break;
 
-        case AST_BINARY_EXPR:
-            printf("BINARY_DECL\n");
-            break;
-        case AST_UNARY_EXPR:
-            printf("UNARY_DECL\n");
+        case AST_VARIABLE_ASSIGN:
+            printf("VARIABLE_ASSIGN\n");
+            tile_ast_show(node->variable_assign.value, indent + 2);
             break;
 
         case AST_WHILE_STATEMENT:
@@ -188,6 +208,7 @@ void tile_ast_show(tile_ast_t* node, int indent) {
                 } 
             }
             break;
+
         case AST_OPTION_STATEMENT:
             printf("OptionStmt\n");
             print_indent(indent + 1);
@@ -199,6 +220,7 @@ void tile_ast_show(tile_ast_t* node, int indent) {
                 tile_ast_show(node->option_statement.statements[i], indent + 2);
             }
             break;
+
         case AST_DEFAULT_STATEMENT:
             printf("DefaultStmt\n");
             print_indent(indent + 1);
@@ -218,9 +240,11 @@ void tile_ast_show(tile_ast_t* node, int indent) {
             tile_ast_show(node->function_statement.return_type, indent + 1);
             tile_ast_show(node->function_statement.body, indent + 1);
             break;
+
         case AST_FUNCTION_ARGUMENT:
             printf("Argument\n");
             break;
+
         case AST_FUNCTION_RETURN_TYPE:
             printf("Return type:\n");
             print_indent(indent + 1);
@@ -236,11 +260,13 @@ void tile_ast_show(tile_ast_t* node, int indent) {
                 break;
             }
             break;
+
         case AST_RETURN_STATEMENT:
             printf("Return Statement:\n");
             // print_indent(indent + 1);
             tile_ast_show(node->return_statement.expression, indent + 1);
             break;
+
         case AST_BLOCK:
             printf("BLOCK\n");
             for(size_t i = 0; i < node->block.statement_count; i++) {

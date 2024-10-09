@@ -6,7 +6,7 @@
 typedef enum {
     OP_ADD,   // +
     OP_SUB,   // -
-    OP_MUL,   // *
+    OP_MULT,   // *
     OP_DIV    // /
 } binary_operator_t;
 
@@ -22,16 +22,11 @@ typedef struct tile_ast {
         AST_NONE,
         AST_PROGRAM, // root node
 
-        AST_LITERAL_INT,
-        AST_LITERAL_FLOAT,
-        AST_LITERAL_STRING,
-
         AST_VARIABLE_DECL,
         AST_VARIABLE_ASSIGN,
         AST_VARIABLE,
 
-        AST_BINARY_EXPR,
-        AST_UNARY_EXPR,
+        AST_EXPRESSION,
 
         AST_WHILE_STATEMENT,
         AST_IF_STATEMENT,
@@ -56,21 +51,6 @@ typedef struct tile_ast {
             size_t statement_count;
         } program;
 
-        // AST_STRING
-        struct ast_string {
-            const char* text_value;
-            const char* string_value;  
-        } string;
-
-        // AST_LITERAL_INT and AST_LITERAL_FLOAT
-        struct ast_number {
-            const char* text_value;
-            union {
-                int value;
-                float fvalue;
-            }; 
-        } number;
-
         // AST_VARIABLE (declaration, assignment, and usage)
         struct ast_variable_decl {
             primitive_type type;
@@ -83,22 +63,62 @@ typedef struct tile_ast {
             struct tile_ast* value;
         } variable_assign;
 
-        struct ast_variable {
-            const char* name;
-        } variable;
+        // EXPRESSION
+        struct ast_expression {
+            
+            enum {
+                EXPR_VARIABLE,
+                EXPR_LIT_INT,
+                EXPR_LIT_FLOAT,
+                EXPR_LIT_STRING,
+                EXPR_BINARY,
+                EXPR_UNARY,
 
-        // AST_BINARY_EXPR
-        struct ast_binary_expr {
-            binary_operator_t op;
-            struct tile_ast* left;
-            struct tile_ast* right;
-        } binary_expr;
+            } expression_kind;
 
-        // AST_UNARY_EXPR
-        struct ast_unary_expr {
-            const char* op; // negative (-5) or logical not (!x)
-            struct tile_ast* operand;
-        } unary_expr;
+            union {
+                // EXPR_VARIABLE_EXPR
+                struct ast_variable_expr {
+                    const char* name;
+                } variable;
+
+                // EXPR_STRING
+                struct ast_lit_string {
+                    const char* text_value;
+                    const char* string_value;
+                    size_t length; 
+                } string;
+
+                // EXPR_LIT_INT and EXPR_LIT_FLOAT
+                struct ast_lit_number {
+                    const char* text_value;
+                    union {
+                        int ivalue;
+                        float fvalue;
+                    }; 
+                } number;
+
+                // EXPR_FUNC_CALL
+                struct ast_func_call {
+                    const char* name;
+                    struct ast_expression** args; // parameters
+                } func_call;
+            
+                // EXPR_BINARY
+                struct ast_binary_expr {
+                    binary_operator_t op;
+                    struct tile_ast* left;
+                    struct tile_ast* right;
+                } binary_expr;
+
+                // EXPR_UNARY
+                struct ast_unary_expr {
+                    const char* op; // negative (-5) or logical not (!x)
+                    struct tile_ast* operand;
+                } unary_expr;
+            };
+
+        } expression;
 
         // AST_WHILE_STATEMENT
         struct ast_while_statement {
