@@ -40,11 +40,11 @@ static const tile_lextoken_t symbols[] = {
 
     { "+", TOKEN_PLUS },
     { "-", TOKEN_MINUS },
+    { "*", TOKEN_STAR },
+    { "/", TOKEN_SLASH },
+
     { "++", TOKEN_INC },
     { "--", TOKEN_DEC },
-    { "*", TOKEN_MULT },
-    { "/", TOKEN_DIV },
-
 
     { "unknown", TOKEN_UNKNOWN },
     { NULL, TOKEN_NONE },
