@@ -77,8 +77,8 @@ static const tile_lextoken_t keywords[] = {
 tile_lexer_t tile_lexer_init(const char* src, const char* file_name) {
     tile_lexer_t lexer = {
         .cursor = 0,
-        .prev_char = src[0],
-        .current_char = src[0],
+        .prev_char = '\0',
+        .current_char = '\0',
         .next_char = src[0],
         .source_code = src,
         .source_code_size = strlen(src),
