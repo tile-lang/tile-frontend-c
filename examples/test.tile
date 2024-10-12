@@ -1,10 +1,4 @@
 
 
-func max(int a, int b): int {
-    if (a) {
-        return b;
-    } else {
-        return a;
-        $
-    }
-}
+int x = getSquare(2) + 2 / 4;
+getSquare(2);

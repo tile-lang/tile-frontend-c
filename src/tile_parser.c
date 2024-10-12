@@ -80,12 +80,16 @@ tile_ast_t* tile_parser_parse_expression(tile_parser_t* parser) {
         break;
 
     case TOKEN_ID:
-        left = tile_ast_create((tile_ast_t) {
-            .expression.variable.name = parser->current_token.value,
-            .expression.expression_kind = EXPR_VARIABLE,
-            .tag = AST_EXPRESSION,
-        });
-        tile_parser_eat(parser, TOKEN_ID);
+        if (parser->next_token.type == TOKEN_LPAREN)
+            left = tile_parser_parse_function_call(parser);
+        else {
+            left = tile_ast_create((tile_ast_t) {
+                .expression.variable.name = parser->current_token.value,
+                .expression.expression_kind = EXPR_VARIABLE,
+                .tag = AST_EXPRESSION,
+            });
+            tile_parser_eat(parser, TOKEN_ID);
+        }
         break;
 
     default:
@@ -160,8 +164,18 @@ tile_ast_t* tile_parser_parse_statement(tile_parser_t* parser) {
         break;
     
     case TOKEN_ID:
-        return tile_parser_parse_variable_def_statement(parser);
-        break;
+        if (parser->next_token.type == TOKEN_LPAREN) {
+            // Function call
+            tile_ast_t* statement = tile_ast_create((tile_ast_t) {
+                .expression = tile_parser_parse_function_call(parser)->expression,
+                .tag = AST_EXPRESSION,
+            });
+            tile_parser_eat(parser, TOKEN_SEMI);
+            return statement;
+        } else {
+            // Variable assignment
+            return tile_parser_parse_variable_def_statement(parser);
+        }
 
     case TOKEN_RETURN:
         return tile_parser_parse_return_statement(parser);
@@ -424,6 +438,39 @@ tile_ast_t* tile_parser_parse_function_statement(tile_parser_t* parser) {
     });
 
     return function;
+}
+
+tile_ast_t* tile_parser_parse_function_call(tile_parser_t* parser) {
+    printf("FUNC CALL\n"); // DEBUG
+    const char* func_name = parser->current_token.value;
+    tile_parser_eat(parser, TOKEN_ID);
+    tile_parser_eat(parser, TOKEN_LPAREN);
+
+    struct ast_expression** args = NULL;
+
+    if (parser->current_token.type != TOKEN_RPAREN) {
+        struct ast_expression* arg = &(tile_parser_parse_expression(parser)->expression);
+        arrput(args, arg);
+
+        while (parser->current_token.type == TOKEN_COMMA) {
+            tile_parser_eat(parser, TOKEN_COMMA);
+            arg = &tile_parser_parse_expression(parser)->expression;
+            arrput(args, arg);
+        }
+    }
+
+    tile_parser_eat(parser, TOKEN_RPAREN);
+
+    tile_ast_t* func_call = tile_ast_create((tile_ast_t) {
+        .expression.func_call.name = func_name,
+        .expression.func_call.args = args,
+        .expression.func_call.arg_count = arrlen(args),
+        .expression.expression_kind = EXPR_FUNC_CALL,
+        .tag = AST_EXPRESSION
+    });
+
+    //tile_parser_eat(parser, TOKEN_SEMI);
+    return func_call;
 }
 
 tile_ast_t* tile_parser_parse_function_argument(tile_parser_t* parser) {

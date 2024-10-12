@@ -71,6 +71,7 @@ typedef struct tile_ast {
                 EXPR_LIT_INT,
                 EXPR_LIT_FLOAT,
                 EXPR_LIT_STRING,
+                EXPR_FUNC_CALL,
                 EXPR_BINARY,
                 EXPR_UNARY,
 
@@ -102,6 +103,7 @@ typedef struct tile_ast {
                 struct ast_func_call {
                     const char* name;
                     struct ast_expression** args; // parameters
+                    size_t arg_count;
                 } func_call;
             
                 // EXPR_BINARY

@@ -42,6 +42,8 @@ tile_ast_t* tile_parser_parse_variable_assign(tile_parser_t* parser);
 
 tile_ast_t* tile_parser_parse_function_statement(tile_parser_t* parser);
 
+tile_ast_t* tile_parser_parse_function_call(tile_parser_t* parser);
+
 tile_ast_t* tile_parser_parse_return_statement(tile_parser_t* parser);
 
 tile_ast_t* tile_parser_parse_function_argument(tile_parser_t* parser);
