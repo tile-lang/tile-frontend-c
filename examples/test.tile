@@ -1,4 +1,4 @@
 
 
-int x = getSquare(2) + 2 / 4;
-getSquare(2);
+int x = getSquare(2,3,4,5,6,7,8);
+getSquare(3);

@@ -448,14 +448,17 @@ tile_ast_t* tile_parser_parse_function_call(tile_parser_t* parser) {
 
     struct ast_expression** args = NULL;
 
-    if (parser->current_token.type != TOKEN_RPAREN) {
+    while (parser->current_token.type != TOKEN_RPAREN) {
         struct ast_expression* arg = &(tile_parser_parse_expression(parser)->expression);
         arrput(args, arg);
 
-        while (parser->current_token.type == TOKEN_COMMA) {
-            tile_parser_eat(parser, TOKEN_COMMA);
-            arg = &tile_parser_parse_expression(parser)->expression;
-            arrput(args, arg);
+        if (parser->current_token.type == TOKEN_COMMA) {
+            if (parser->next_token.type == TOKEN_RPAREN || parser->next_token.type == TOKEN_COMMA) {
+                printf("Syntax Error: Function call arguments!\n");
+                break;
+            }
+            else
+                tile_parser_eat(parser, TOKEN_COMMA);
         }
     }
 
@@ -469,7 +472,6 @@ tile_ast_t* tile_parser_parse_function_call(tile_parser_t* parser) {
         .tag = AST_EXPRESSION
     });
 
-    //tile_parser_eat(parser, TOKEN_SEMI);
     return func_call;
 }
 
