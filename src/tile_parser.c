@@ -207,17 +207,13 @@ tile_ast_t* tile_parser_parse_for_statement(tile_parser_t* parser) {
 
     tile_parser_eat(parser, TOKEN_FOR);
     tile_parser_eat(parser, TOKEN_LPAREN);
-    tile_ast_t* initialization = tile_parser_parse_statement(parser); // initialization part
-    printf("Parsed initialization\n"); // Debugging output
+    tile_ast_t* initialization = tile_parser_parse_variable_assign(parser);
     tile_parser_eat(parser, TOKEN_SEMI);
-    tile_ast_t* condition = tile_parser_parse_expression(parser); // condition part
-    printf("Parsed condition\n"); // Debugging output
+    tile_ast_t* condition = tile_parser_parse_expression(parser);
     tile_parser_eat(parser, TOKEN_SEMI);
-    tile_ast_t* update = tile_parser_parse_expression(parser); // update part
-    printf("Parsed update\n"); // Debugging output
+    tile_ast_t* update = tile_parser_parse_expression(parser);
     tile_parser_eat(parser, TOKEN_RPAREN);
-    tile_ast_t* body = tile_parser_parse_block(parser); // body part
-    printf("Parsed body\n"); // Debugging output
+    tile_ast_t* body = tile_parser_parse_block(parser);
     tile_ast_t* for_statement = tile_ast_create((tile_ast_t) {
         .for_statement.initialization = initialization,
         .for_statement.condition = condition,
