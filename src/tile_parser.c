@@ -207,8 +207,8 @@ tile_ast_t* tile_parser_parse_for_statement(tile_parser_t* parser) {
 
     tile_parser_eat(parser, TOKEN_FOR);
     tile_parser_eat(parser, TOKEN_LPAREN);
-    tile_ast_t* initialization = tile_parser_parse_variable_assign(parser);
-    tile_parser_eat(parser, TOKEN_SEMI);
+    tile_ast_t* initialization = tile_parser_parse_variable_dec_statement(parser);
+    // tile_parser_eat(parser, TOKEN_SEMI);
     tile_ast_t* condition = tile_parser_parse_expression(parser);
     tile_parser_eat(parser, TOKEN_SEMI);
     tile_ast_t* update = tile_parser_parse_expression(parser);
