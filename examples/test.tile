@@ -5,6 +5,28 @@ func max(int a, int b): int {
         return b;
     } else {
         return a;
-        $
+        //$
+    }
+}
+
+func main(): int {
+    
+    int x = 18 - 21;
+    return 7 / 1 + 2 * 3;
+}
+
+while (true) {
+    if (a) {
+        return b;
+    } else if (3 + a){
+        return a;
+        //$
+    } else if (2 - 88) {
+        return a;
+    } else {
+        if (x - 7) {
+            return x;
+        }
+        return y;
     }
 }

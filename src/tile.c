@@ -54,6 +54,15 @@ int main(int argc, char *argv[]) {
 
     tile_lexer_t lexer = tile_lexer_init(file_content, argv[1]);
 
+    tile_token_t token = tile_token_create(TOKEN_NONE, NULL);
+    tile_lexer_advance(&lexer);
+    while(token.type != TOKEN_EOF) {
+        token = tile_lexer_get_next_token(&lexer);
+        printf("TOKEN(%d:%d: %d, %s)\n", lexer.loc.row, lexer.loc.col, token.type, token.value);
+    }
+    exit(EXIT_SUCCESS);
+
+
     tile_ast_arena_init();
     tile_parser_t parser = tile_parser_init(&lexer);
     tile_parser_eat(&parser, TOKEN_NONE);
@@ -68,12 +77,6 @@ int main(int argc, char *argv[]) {
 
     // symtab_show(symtab);
     
-    // tile_token_t token = tile_token_create(TOKEN_NONE, NULL);
-    // tile_lexer_advance(&lexer);
-    // while(token.type != TOKEN_EOF) {
-    //     token = tile_lexer_get_next_token(&lexer);
-    //     printf("TOKEN(%d, %s, Row %d, Col %d)\n", token.type, token.value, lexer.loc.row, lexer.loc.col);
-    // }
 
     arena_destroy(src_arena);
     tile_lexer_destroy(&lexer);

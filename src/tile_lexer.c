@@ -83,7 +83,7 @@ tile_lexer_t tile_lexer_init(const char* src, const char* file_name) {
         .source_code = src,
         .source_code_size = strlen(src),
         .line_lengths = NULL,
-        .loc.row = 0,
+        .loc.row = 1,
         .loc.col = 0,
         .loc.file_name =  file_name,
         .arena = arena_init(LEXER_ARENA_CAPACITY),

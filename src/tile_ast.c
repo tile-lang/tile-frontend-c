@@ -25,7 +25,7 @@ tile_ast_t* tile_ast_create(tile_ast_t ast) {
 }
 
 void tile_ast_destroy(tile_ast_t* node) {
-
+    if (!node) return;
     switch (node->tag)
     {
     case AST_PROGRAM:
@@ -121,7 +121,7 @@ void tile_ast_show(tile_ast_t* node, int indent) {
                 break;
                 
                 case EXPR_LIT_INT:
-                    printf("EXPR_LIT_INT\n");
+                    printf("EXPR_LIT_INT: %s\n", node->expression.number.text_value);
                 break;
                 
                 case EXPR_LIT_FLOAT:
